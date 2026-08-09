@@ -1,0 +1,120 @@
+name: Bug report
+description: Something is broken
+labels: ['bug', 'needs triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting.
+
+        **Please do not attach voice recordings or quote what someone said in one.** Describe the
+        behaviour instead. See our Code of Conduct.
+
+        If this is a security vulnerability, do not file it here — follow `SECURITY.md`.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before filing
+      options:
+        - label: I checked [TROUBLESHOOTING.md](../blob/main/docs/TROUBLESHOOTING.md)
+          required: true
+        - label: I searched existing issues
+          required: true
+        - label: Simple Voice Chat works on its own (I can hear and be heard in proximity chat)
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what happened, what you expected instead.
+      placeholder: |
+        I held B while looking at a chest and spoke for about five seconds.
+        When I released the key, nothing appeared.
+        I expected the confirmation screen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Join a dedicated server
+        2. Look at a chest from two blocks away
+        3. Hold B for five seconds and speak
+        4. Release B
+    validations:
+      required: true
+
+  - type: input
+    id: echopins-version
+    attributes:
+      label: EchoPins version
+      placeholder: 1.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: svc-version
+    attributes:
+      label: Simple Voice Chat version
+      placeholder: 1.21.1-2.6.22
+    validations:
+      required: true
+
+  - type: input
+    id: neoforge-version
+    attributes:
+      label: NeoForge version
+      placeholder: 21.1.248
+    validations:
+      required: true
+
+  - type: dropdown
+    id: side
+    attributes:
+      label: Where does it happen?
+      options:
+        - Single player
+        - Dedicated server
+        - Both
+    validations:
+      required: true
+
+  - type: dropdown
+    id: voice-mode
+    attributes:
+      label: Voice chat input mode
+      description: >-
+        Relevant for anything involving recording. In push-to-talk you must hold your voice chat
+        key as well as the EchoPins key.
+      options:
+        - Voice activation
+        - Push-to-talk
+        - Not relevant to this bug
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log
+      description: >-
+        `logs/latest.log` from the side that misbehaved. Attach the file, or paste the relevant
+        part. Search it for `EchoPins` first.
+      render: text
+
+  - type: textarea
+    id: mods
+    attributes:
+      label: Other mods
+      description: Modpack name, or the mod list if it is small. Say "vanilla + EchoPins + SVC" if that is the case.
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Non-default configuration
+      description: Anything you changed in `echopins-server.toml` or `echopins-client.toml`.
+      render: toml

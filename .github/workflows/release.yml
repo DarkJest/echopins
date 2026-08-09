@@ -1,0 +1,175 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to release, for example v1.0.0'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Cache NeoForm artifacts
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches/neoformruntime
+          key: neoform-${{ runner.os }}-${{ hashFiles('gradle.properties') }}
+          restore-keys: neoform-${{ runner.os }}-
+
+      # A clean build for a release: no chance of a stale artifact from an earlier commit.
+      - name: Clean build and test
+        run: ./gradlew clean build --stacktrace
+
+      - name: Check the tag matches mod_version
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          VERSION="${TAG#v}"
+          MOD_VERSION=$(grep -E '^mod_version=' gradle.properties | cut -d= -f2)
+          echo "Tag version:  $VERSION"
+          echo "gradle.properties: $MOD_VERSION"
+          if [ "$VERSION" != "$MOD_VERSION" ]; then
+            echo "::error::Tag $TAG does not match mod_version=$MOD_VERSION in gradle.properties"
+            exit 1
+          fi
+
+      - name: Identify the artifact and compute its checksum
+        id: artifact
+        run: |
+          JAR=$(find build/libs -name '*.jar' ! -name '*-sources.jar' | head -n 1)
+          if [ -z "$JAR" ]; then
+            echo "::error::No jar produced"
+            exit 1
+          fi
+          SHA=$(sha256sum "$JAR" | cut -d' ' -f1)
+          echo "jar=$JAR" >> "$GITHUB_OUTPUT"
+          echo "name=$(basename "$JAR")" >> "$GITHUB_OUTPUT"
+          echo "sha256=$SHA" >> "$GITHUB_OUTPUT"
+          sha256sum "$JAR" > "$JAR.sha256"
+          echo "$(basename "$JAR")  sha256  $SHA"
+
+      - name: Assemble release notes
+        id: notes
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          NOTES=release-notes.md
+          if [ -f release/github-release.md ]; then
+            cp release/github-release.md "$NOTES"
+          else
+            echo "# EchoPins $TAG" > "$NOTES"
+          fi
+          {
+            echo ""
+            echo "## Checksums"
+            echo ""
+            echo '```'
+            echo "${{ steps.artifact.outputs.name }}"
+            echo "SHA-256: ${{ steps.artifact.outputs.sha256 }}"
+            echo '```'
+          } >> "$NOTES"
+          echo "path=$NOTES" >> "$GITHUB_OUTPUT"
+
+      - name: Create the GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          name: EchoPins ${{ github.event.inputs.tag || github.ref_name }}
+          body_path: ${{ steps.notes.outputs.path }}
+          draft: false
+          prerelease: ${{ contains(github.event.inputs.tag || github.ref_name, '-') }}
+          files: |
+            ${{ steps.artifact.outputs.jar }}
+            ${{ steps.artifact.outputs.jar }}.sha256
+          fail_on_unmatched_files: true
+
+  # Publishing to the mod sites is deliberately a separate job that is allowed to fail. The
+  # GitHub release above is the source of truth and must never be blocked by a third-party API
+  # being down or a token being absent.
+  publish:
+    name: Publish to Modrinth and CurseForge
+    runs-on: ubuntu-latest
+    needs: release
+    if: ${{ !contains(github.event.inputs.tag || github.ref_name, '-') }}
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Check for publishing credentials
+        id: creds
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+        run: |
+          if [ -z "$MODRINTH_TOKEN" ] && [ -z "$CURSEFORGE_TOKEN" ]; then
+            echo "No publishing tokens configured; skipping. See docs/RELEASE.md."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up JDK 21
+        if: steps.creds.outputs.skip == 'false'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        if: steps.creds.outputs.skip == 'false'
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build
+        if: steps.creds.outputs.skip == 'false'
+        run: ./gradlew build
+
+      - name: Download the release jar name
+        if: steps.creds.outputs.skip == 'false'
+        id: jar
+        run: echo "path=$(find build/libs -name '*.jar' ! -name '*-sources.jar' | head -n 1)" >> "$GITHUB_OUTPUT"
+
+      - name: Publish
+        if: steps.creds.outputs.skip == 'false'
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: ${{ secrets.MODRINTH_PROJECT_ID }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          curseforge-id: ${{ secrets.CURSEFORGE_PROJECT_ID }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          files: ${{ steps.jar.outputs.path }}
+          name: EchoPins ${{ github.event.inputs.tag || github.ref_name }}
+          version: ${{ github.event.inputs.tag || github.ref_name }}
+          version-type: release
+          changelog-file: release/modrinth-changelog.md
+          loaders: neoforge
+          game-versions: 1.21.1
+          java: 21
+          dependencies: |
+            simple-voice-chat(required)

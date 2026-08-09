@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <title>EchoPins UI mockup: a private EchoPin</title>
+  <defs>
+    <style>
+      .ui { font-family: 'Segoe UI', sans-serif; }
+      .title { font-size: 19px; fill: #E9F3F5; }
+      .muted { font-size: 19px; fill: #9BB0B6; }
+      .accent { font-size: 19px; fill: #2FB6C4; }
+      .grey { font-size: 19px; fill: #8A9BA1; }
+      .caption { font-size: 19px; fill: #C4D3D7; font-style: italic; }
+      .tag { font-size: 16px; fill: #7A8E95; letter-spacing: 2px; }
+      .note { font-size: 20px; fill: #9BB0B6; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="720" fill="#232A31"/>
+  <g opacity="0.55">
+    <rect x="0" y="0" width="1280" height="120" fill="#2A323A"/>
+    <rect x="0" y="120" width="1280" height="120" fill="#262E35"/>
+    <rect x="0" y="240" width="1280" height="120" fill="#2D353E"/>
+    <rect x="0" y="360" width="1280" height="120" fill="#242B32"/>
+    <rect x="0" y="480" width="1280" height="120" fill="#2B333B"/>
+    <rect x="0" y="600" width="1280" height="120" fill="#1F252B"/>
+  </g>
+  <g opacity="0.28" fill="#161B20">
+    <rect x="180" y="120" width="120" height="120"/>
+    <rect x="840" y="240" width="120" height="120"/>
+    <rect x="300" y="420" width="120" height="120"/>
+    <rect x="960" y="60" width="120" height="120"/>
+  </g>
+  <rect x="0" y="600" width="1280" height="120" fill="#1B2126"/>
+
+  <!-- A doorway / portal frame the note is about -->
+  <g>
+    <rect x="500" y="360" width="220" height="242" fill="#3A2E52"/>
+    <rect x="500" y="360" width="220" height="242" fill="none" stroke="#241C36" stroke-width="10"/>
+    <rect x="530" y="392" width="160" height="180" fill="#6B4FA8" opacity="0.75"/>
+  </g>
+
+  <!-- Private marker -->
+  <g transform="translate(610 258) scale(0.19) translate(-256 -256)">
+    <g fill="#16202B">
+      <circle cx="256" cy="200" r="150"/>
+      <path d="M 152 292 L 360 292 L 256 452 Z"/>
+    </g>
+    <g fill="#5B7FA6">
+      <circle cx="256" cy="200" r="126"/>
+      <path d="M 168 282 L 344 282 L 256 421 Z"/>
+    </g>
+    <g fill="#F5FAFB" transform="translate(256 200) scale(0.9) translate(-256 -214)">
+      <rect x="226" y="122" width="60" height="116" rx="30" ry="30"/>
+      <path d="M 186 200 a 70 70 0 0 0 140 0 h -26 a 44 44 0 0 1 -88 0 Z"/>
+      <rect x="246" y="262" width="20" height="34"/>
+      <rect x="212" y="292" width="88" height="20" rx="10" ry="10"/>
+    </g>
+    <g>
+      <circle cx="372" cy="316" r="98" fill="#16202B"/>
+      <circle cx="372" cy="316" r="80" fill="#E5A03D"/>
+      <path d="M 340 296 v -22 a 32 32 0 0 1 64 0 v 22 h -22 v -22 a 10 10 0 0 0 -20 0 v 22 Z" fill="#16202B"/>
+      <rect x="330" y="296" width="84" height="66" rx="10" ry="10" fill="#16202B"/>
+    </g>
+  </g>
+
+  <g fill="#E8EEF0" opacity="0.85">
+    <rect x="632" y="359" width="16" height="2"/>
+    <rect x="639" y="352" width="2" height="16"/>
+  </g>
+
+  <g transform="translate(474 392)">
+    <rect x="0" y="0" width="332" height="76" fill="#101418" opacity="0.71"/>
+    <text class="ui title" x="12" y="24">Mira</text>
+    <text class="ui grey" x="62" y="24">[private]</text>
+    <text class="ui muted" x="12" y="47">4m ago  ·  0:11</text>
+    <text class="ui accent" x="12" y="69">R to play  ·  N for inbox</text>
+  </g>
+
+  <text class="ui note" x="640" y="648" text-anchor="middle">Only the people you choose can see or hear a private EchoPin.</text>
+  <text class="ui tag" x="24" y="700">UI MOCKUP — NOT A GAMEPLAY SCREENSHOT</text>
+</svg>

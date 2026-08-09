@@ -1,0 +1,59 @@
+name: Feature request
+description: Suggest an improvement
+labels: ['enhancement', 'needs triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        EchoPins is deliberately small: it does one thing, which is letting friends leave short
+        voice messages in places. Please check the non-goals in `CONTRIBUTING.md` before filing —
+        several popular ideas are declined on purpose, not by oversight.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before filing
+      options:
+        - label: I read the non-goals list in [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md)
+          required: true
+        - label: I searched existing issues
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: >-
+        Describe the situation you hit, not the solution you have in mind. This is the most useful
+        part of the report — a well-described problem often has a simpler solution than the one
+        first imagined.
+      placeholder: |
+        When I come back to a base after a week, I can't tell which messages I've already heard
+        without walking to each one.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+      description: Including "I could just use X mod instead" — that is genuinely useful to know.
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Who is this for?
+      options:
+        - Players
+        - Server administrators
+        - Modpack authors
+        - Developers integrating with EchoPins
+    validations:
+      required: true

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="EchoPins logo: a map pin containing a microphone, with echo arcs on either side">
+  <title>EchoPins</title>
+
+  <!--
+    EchoPins mark: a map pin whose head holds a microphone, flanked by echo arcs.
+
+    Flat shapes only, no gradients, so it stays crisp rasterised down to 32x32 and reads as a
+    pure silhouette. The dark plate behind the pin is a slightly larger copy of the same
+    geometry, which produces an even outline without depending on stroke alignment. The arcs sit
+    outside the pin so they read as sound rather than as notches cut into the edge; they are the
+    first thing to disappear at very small sizes, which is the intended behaviour.
+  -->
+
+  <!-- Echo arcs -->
+  <g fill="none" stroke="#E5A03D" stroke-width="20" stroke-linecap="round">
+    <path d="M 390 95 A 170 170 0 0 1 390 305"/>
+    <path d="M 122 95 A 170 170 0 0 0 122 305"/>
+  </g>
+
+  <!-- Outline plate -->
+  <g fill="#16202B">
+    <circle cx="256" cy="200" r="137"/>
+    <path d="M 160 286 L 352 286 L 256 436 Z"/>
+  </g>
+
+  <!-- Pin body -->
+  <g fill="#2FB6C4">
+    <circle cx="256" cy="200" r="118"/>
+    <path d="M 172 278 L 340 278 L 256 409 Z"/>
+  </g>
+
+  <!-- Microphone, scaled to the smaller pin head -->
+  <g fill="#F5FAFB" transform="translate(256 200) scale(0.843) translate(-256 -214)">
+    <!-- capsule -->
+    <rect x="226" y="122" width="60" height="116" rx="30" ry="30"/>
+    <!-- cradle -->
+    <path d="M 186 200 a 70 70 0 0 0 140 0 h -26 a 44 44 0 0 1 -88 0 Z"/>
+    <!-- stem -->
+    <rect x="246" y="262" width="20" height="34"/>
+    <!-- base -->
+    <rect x="212" y="292" width="88" height="20" rx="10" ry="10"/>
+  </g>
+</svg>

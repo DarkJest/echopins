@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <title>EchoPins UI mockup: the inbox screen</title>
+  <defs>
+    <style>
+      .ui { font-family: 'Segoe UI', sans-serif; }
+      .h { font-size: 26px; fill: #E9F3F5; }
+      .row { font-size: 19px; fill: #E9F3F5; }
+      .rowUnread { font-size: 19px; fill: #E5A03D; }
+      .meta { font-size: 17px; fill: #9BB0B6; }
+      .btn { font-size: 17px; fill: #E9F3F5; }
+      .btnOff { font-size: 17px; fill: #6E7F85; }
+      .grey { font-size: 17px; fill: #8A9BA1; }
+      .foot { font-size: 17px; fill: #9BB0B6; }
+      .tag { font-size: 16px; fill: #7A8E95; letter-spacing: 2px; }
+    </style>
+  </defs>
+
+  <!-- Dimmed world behind the screen -->
+  <rect width="1280" height="720" fill="#2B2622"/>
+  <g opacity="0.5">
+    <rect x="0" y="0" width="1280" height="180" fill="#332D28"/>
+    <rect x="0" y="180" width="1280" height="180" fill="#2E2823"/>
+    <rect x="0" y="360" width="1280" height="180" fill="#37302A"/>
+    <rect x="0" y="540" width="1280" height="180" fill="#282320"/>
+  </g>
+  <rect width="1280" height="720" fill="#000000" opacity="0.55"/>
+
+  <!-- Panel -->
+  <g transform="translate(340 84)">
+    <rect x="0" y="0" width="600" height="552" fill="#101418" opacity="0.79"/>
+    <text class="ui h" x="300" y="42" text-anchor="middle">EchoPins</text>
+
+    <!-- Tabs -->
+    <g>
+      <rect x="20" y="62" width="138" height="34" fill="#1D262C"/>
+      <text class="ui btn" x="89" y="85" text-anchor="middle">Nearby</text>
+      <rect x="164" y="62" width="138" height="34" fill="#151D22"/>
+      <text class="ui btnOff" x="233" y="85" text-anchor="middle">Mine</text>
+      <rect x="308" y="62" width="138" height="34" fill="#151D22"/>
+      <text class="ui btnOff" x="377" y="85" text-anchor="middle">Private</text>
+      <rect x="452" y="62" width="128" height="34" fill="#151D22"/>
+      <text class="ui btnOff" x="516" y="85" text-anchor="middle">Unread</text>
+    </g>
+
+    <!-- Rows -->
+    <g transform="translate(0 118)">
+      <g transform="translate(0 0)">
+        <text class="ui rowUnread" x="20" y="24">Alex</text>
+        <text class="ui meta" x="216" y="24">12s ago   0:08   118, 41, -304</text>
+        <rect x="404" y="6" width="84" height="26" fill="#1D262C"/>
+        <text class="ui btn" x="446" y="25" text-anchor="middle">Play</text>
+        <rect x="496" y="6" width="88" height="26" fill="#151D22"/>
+        <text class="ui btnOff" x="540" y="25" text-anchor="middle">Delete</text>
+      </g>
+      <g transform="translate(0 44)">
+        <text class="ui row" x="20" y="24">Mira</text>
+        <text class="ui grey" x="76" y="24">[private]</text>
+        <text class="ui meta" x="216" y="24">4m ago   0:11   96, 63, -288</text>
+        <rect x="404" y="6" width="84" height="26" fill="#1D262C"/>
+        <text class="ui btn" x="446" y="25" text-anchor="middle">Play</text>
+        <rect x="496" y="6" width="88" height="26" fill="#151D22"/>
+        <text class="ui btnOff" x="540" y="25" text-anchor="middle">Delete</text>
+      </g>
+      <g transform="translate(0 88)">
+        <text class="ui row" x="20" y="24">You</text>
+        <text class="ui meta" x="216" y="24">1h ago   0:06   102, 70, -260</text>
+        <rect x="404" y="6" width="84" height="26" fill="#1D262C"/>
+        <text class="ui btn" x="446" y="25" text-anchor="middle">Play</text>
+        <rect x="496" y="6" width="88" height="26" fill="#1D262C"/>
+        <text class="ui btn" x="540" y="25" text-anchor="middle">Delete</text>
+      </g>
+      <g transform="translate(0 132)">
+        <text class="ui row" x="20" y="24">Jonas</text>
+        <text class="ui meta" x="216" y="24">3h ago   0:14   -12, 12, 402</text>
+        <rect x="404" y="6" width="84" height="26" fill="#1D262C"/>
+        <text class="ui btn" x="446" y="25" text-anchor="middle">Play</text>
+        <rect x="496" y="6" width="88" height="26" fill="#151D22"/>
+        <text class="ui btnOff" x="540" y="25" text-anchor="middle">Delete</text>
+      </g>
+      <g transform="translate(0 176)">
+        <text class="ui row" x="20" y="24">Alex</text>
+        <text class="ui meta" x="216" y="24">2d ago   0:09   240, 32, -190</text>
+        <rect x="404" y="6" width="84" height="26" fill="#1D262C"/>
+        <text class="ui btn" x="446" y="25" text-anchor="middle">Play</text>
+        <rect x="496" y="6" width="88" height="26" fill="#151D22"/>
+        <text class="ui btnOff" x="540" y="25" text-anchor="middle">Delete</text>
+      </g>
+    </g>
+
+    <text class="ui foot" x="300" y="446" text-anchor="middle">Page 1 of 3</text>
+
+    <g>
+      <rect x="20" y="474" width="40" height="34" fill="#1D262C"/>
+      <text class="ui btn" x="40" y="497" text-anchor="middle">&lt;</text>
+      <rect x="240" y="474" width="120" height="34" fill="#1D262C"/>
+      <text class="ui btn" x="300" y="497" text-anchor="middle">Done</text>
+      <rect x="540" y="474" width="40" height="34" fill="#1D262C"/>
+      <text class="ui btn" x="560" y="497" text-anchor="middle">&gt;</text>
+    </g>
+  </g>
+
+  <text class="ui tag" x="24" y="700">UI MOCKUP — NOT A GAMEPLAY SCREENSHOT</text>
+</svg>

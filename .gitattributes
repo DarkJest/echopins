@@ -1,0 +1,25 @@
+# Normalise line endings in the repository to LF regardless of the machine that commits.
+* text=auto eol=lf
+
+# gradlew is executed by /bin/sh on Linux CI. With CRLF endings the shebang line becomes
+# "#!/bin/sh\r", which fails with a "bad interpreter" error that is confusing to diagnose.
+gradlew text eol=lf
+*.sh text eol=lf
+
+# Windows-only scripts keep CRLF so they behave in cmd.exe.
+gradlew.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Never touch binaries.
+*.jar binary
+*.png binary
+*.nbt binary
+*.epv binary
+*.ogg binary
+*.ico binary
+
+# SVG is text, but treat it as such explicitly so diffs stay readable.
+*.svg text eol=lf
+
+# Keep generated/vendored files out of language statistics and diffs where appropriate.
+gradle/wrapper/gradle-wrapper.jar binary linguist-vendored

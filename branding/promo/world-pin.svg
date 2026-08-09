@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <title>EchoPins UI mockup: an EchoPin next to a chest</title>
+  <defs>
+    <style>
+      .ui { font-family: 'Segoe UI', sans-serif; }
+      .title { font-size: 19px; fill: #E9F3F5; }
+      .muted { font-size: 19px; fill: #9BB0B6; }
+      .accent { font-size: 19px; fill: #2FB6C4; }
+      .amber { font-size: 19px; fill: #E5A03D; }
+      .caption { font-size: 19px; fill: #C4D3D7; font-style: italic; }
+      .tag { font-size: 16px; fill: #7A8E95; letter-spacing: 2px; }
+    </style>
+  </defs>
+
+  <!-- Abstract blocky backdrop: suggests a mine wall without pretending to be a render -->
+  <rect width="1280" height="720" fill="#2B2622"/>
+  <g opacity="0.55">
+    <rect x="0" y="0" width="1280" height="120" fill="#332D28"/>
+    <rect x="0" y="120" width="1280" height="120" fill="#2E2823"/>
+    <rect x="0" y="240" width="1280" height="120" fill="#37302A"/>
+    <rect x="0" y="360" width="1280" height="120" fill="#2C2621"/>
+    <rect x="0" y="480" width="1280" height="120" fill="#332C26"/>
+    <rect x="0" y="600" width="1280" height="120" fill="#282320"/>
+  </g>
+  <g opacity="0.30" fill="#1E1A17">
+    <rect x="120" y="60" width="120" height="120"/>
+    <rect x="480" y="180" width="120" height="120"/>
+    <rect x="900" y="300" width="120" height="120"/>
+    <rect x="240" y="420" width="120" height="120"/>
+    <rect x="1020" y="60" width="120" height="120"/>
+    <rect x="660" y="540" width="120" height="120"/>
+  </g>
+  <!-- floor -->
+  <rect x="0" y="600" width="1280" height="120" fill="#241F1B"/>
+
+  <!-- Chest -->
+  <g>
+    <rect x="520" y="452" width="180" height="150" fill="#7A5326"/>
+    <rect x="520" y="452" width="180" height="52" fill="#8C6130"/>
+    <rect x="520" y="500" width="180" height="10" fill="#4A3117"/>
+    <rect x="596" y="486" width="28" height="34" rx="4" fill="#C9C2B4"/>
+    <rect x="520" y="452" width="180" height="150" fill="none" stroke="#3E2A13" stroke-width="6"/>
+  </g>
+
+  <!-- EchoPin marker floating above the chest -->
+  <g transform="translate(610 300) scale(0.19) translate(-256 -256)">
+    <g fill="#16202B">
+      <circle cx="256" cy="200" r="150"/>
+      <path d="M 152 292 L 360 292 L 256 452 Z"/>
+    </g>
+    <g fill="#2FB6C4">
+      <circle cx="256" cy="200" r="126"/>
+      <path d="M 168 282 L 344 282 L 256 421 Z"/>
+    </g>
+    <g fill="#F5FAFB" transform="translate(256 200) scale(0.9) translate(-256 -214)">
+      <rect x="226" y="122" width="60" height="116" rx="30" ry="30"/>
+      <path d="M 186 200 a 70 70 0 0 0 140 0 h -26 a 44 44 0 0 1 -88 0 Z"/>
+      <rect x="246" y="262" width="20" height="34"/>
+      <rect x="212" y="292" width="88" height="20" rx="10" ry="10"/>
+    </g>
+  </g>
+
+  <!-- Crosshair -->
+  <g fill="#E8EEF0" opacity="0.85">
+    <rect x="632" y="359" width="16" height="2"/>
+    <rect x="639" y="352" width="2" height="16"/>
+  </g>
+
+  <!-- Focused pin label, matching FocusedPinHud -->
+  <g transform="translate(492 392)">
+    <rect x="0" y="0" width="296" height="98" fill="#101418" opacity="0.71"/>
+    <text class="ui title" x="12" y="24">Alex</text>
+    <text class="ui amber" x="62" y="24">• new</text>
+    <text class="ui muted" x="12" y="47">12s ago  ·  0:08</text>
+    <text class="ui caption" x="12" y="70">Don't take the iron yet, it's for the reactor</text>
+    <text class="ui accent" x="12" y="91">R to play  ·  N for inbox</text>
+  </g>
+
+  <!-- Hotbar suggestion, so the framing reads as in-game -->
+  <g opacity="0.9">
+    <rect x="458" y="660" width="364" height="40" rx="4" fill="#111111" opacity="0.6"/>
+    <rect x="460" y="662" width="36" height="36" fill="#2A2A2A" opacity="0.7"/>
+  </g>
+
+  <text class="ui tag" x="24" y="700">UI MOCKUP — NOT A GAMEPLAY SCREENSHOT</text>
+</svg>

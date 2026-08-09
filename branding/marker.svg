@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 512 512" role="img" aria-label="EchoPin world marker">
+  <title>EchoPin marker</title>
+
+  <!--
+    The in-world billboard. Same pin as the logo with the echo arcs dropped: at the size this is
+    actually drawn they would collapse into a smudge, and the marker needs to read instantly as
+    "a voice message is here" rather than carry the full brand mark.
+  -->
+
+  <g fill="#16202B">
+    <circle cx="256" cy="200" r="150"/>
+    <path d="M 152 292 L 360 292 L 256 452 Z"/>
+  </g>
+
+  <g fill="#2FB6C4">
+    <circle cx="256" cy="200" r="126"/>
+    <path d="M 168 282 L 344 282 L 256 421 Z"/>
+  </g>
+
+  <g fill="#F5FAFB" transform="translate(256 200) scale(0.9) translate(-256 -214)">
+    <rect x="226" y="122" width="60" height="116" rx="30" ry="30"/>
+    <path d="M 186 200 a 70 70 0 0 0 140 0 h -26 a 44 44 0 0 1 -88 0 Z"/>
+    <rect x="246" y="262" width="20" height="34"/>
+    <rect x="212" y="292" width="88" height="20" rx="10" ry="10"/>
+  </g>
+</svg>
