@@ -17,7 +17,7 @@ First release. Minecraft 1.21.1, NeoForge, requires Simple Voice Chat.
 
 ```
 echopins-1.0.0+mc1.21.1-neoforge.jar
-SHA-256: 2c6e7084e983db52e1e5539bd72eb276fc852c228be352726d5a8af47a81ba93
+SHA-256: a28127758a38ece15af6796b8e1c1aae877ddfa7ff7685bc7a4a5cd34e148aec
 ```
 
 Built against NeoForge 21.1.248 and `voicechat-api` 2.6.20. The build is reproducible: two clean

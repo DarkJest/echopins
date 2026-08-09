@@ -7,11 +7,19 @@ import java.util.UUID;
 /**
  * The v1 access rules.
  *
- * <p>Operators can discover, play and delete anything, because a server admin already has full
- * access to the world files and needs to be able to moderate abusive recordings. Operators
- * deliberately cannot <em>edit</em> another player's pin: silently rewriting someone's caption
- * or visibility is a different kind of power from moderation, and deleting is the honest tool
- * for that job.
+ * <p><b>Operator status grants no access to private recordings.</b> A private pin is readable by
+ * its author and the people the author named, and by nobody else - including admins. That is what
+ * the word "private" has to mean in a mod whose whole subject is people's voices; an operator
+ * bypass here made private pins effectively public on any server where staff are online, and
+ * completely meaningless in single player, where the host always holds permission level 4.
+ *
+ * <p>Moderation is still possible and is deliberately shaped as <em>removal</em>: an operator can
+ * delete any pin without being able to listen to it. Where an admin genuinely must audit content,
+ * they have direct access to the world files, which {@code PRIVACY.md} states plainly rather than
+ * pretending otherwise.
+ *
+ * <p>Operators also cannot <em>edit</em> another player's pin: silently rewriting someone's
+ * caption or visibility is a different kind of power again.
  */
 public final class DefaultAccessPolicy implements AccessPolicy {
 
@@ -19,9 +27,7 @@ public final class DefaultAccessPolicy implements AccessPolicy {
 
     @Override
     public boolean canDiscover(EchoPin pin, UUID viewer, boolean operator) {
-        if (operator) {
-            return true;
-        }
+        // `operator` is intentionally unused: see the class note.
         return isOwner(pin, viewer)
                 || pin.visibility() == Visibility.PUBLIC
                 || pin.recipients().contains(viewer);

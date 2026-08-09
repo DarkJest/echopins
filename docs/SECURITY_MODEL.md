@@ -44,7 +44,7 @@ cannot be bypassed by reaching a different code path.
 
 ### Playing a private pin you were not given
 
-Checked in three independent places:
+Checked in three independent places, and **operator status is not a bypass** for any of them:
 
 1. `PinSyncService` never sends a pin the viewer cannot discover, so the client is not told it
    exists.
@@ -65,9 +65,9 @@ another player's contacts.
 ### Deleting someone else's pin
 
 `PinService.delete` runs `AccessPolicy.canDelete` before touching the repository. Operators may
-delete anything (moderation); operators deliberately **cannot** edit anything, because silently
-rewriting a caption or flipping a private pin to public is a different kind of power from removing
-abusive content.
+delete anything, which is the whole of their moderation power: they cannot play, reveal or edit a
+private pin. An operator bypass on playback made private pins meaningless wherever staff are
+online, and entirely meaningless in single player, where the host always holds permission level 4.
 
 ### Path traversal
 

@@ -151,9 +151,10 @@ EchoPins records your voice, so this is spelled out rather than buried:
 - Recording happens **only** while you hold the key. No background capture, ever.
 - A prominent indicator is on screen the whole time, and it cannot be disabled.
 - Only **your own** voice is captured — never other players, never ambient chat.
-- Audio is stored **on the server**, in the world save. **The server operator can hear it**, just
-  as they can read every chat log and book on their server. Do not record anything you would not
-  want them to hear.
+- Audio is stored **on the server**, in the world save. Operator status grants **no** in-game
+  access to a private pin — an admin can delete one without being able to play it — but anyone who
+  can read the server's files can read the audio. Do not record anything you would not want the
+  server's owner to hear.
 - Cancelling discards the recording. Unconfirmed recordings are deleted automatically.
 - Nothing is uploaded anywhere. No telemetry, no external services, no transcription.
 

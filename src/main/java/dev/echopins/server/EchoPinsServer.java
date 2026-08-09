@@ -60,8 +60,8 @@ public final class EchoPinsServer implements EchoPinsNetwork.ServerRequestHandle
 
     private static final Logger LOGGER = LoggerFactory.getLogger("EchoPins/Server");
 
-    /** How many pins one inbox page holds. */
-    public static final int INBOX_PAGE_SIZE = 8;
+    /** How many pins one inbox page holds. Must match the row count the inbox screen draws. */
+    public static final int INBOX_PAGE_SIZE = 6;
 
     private static volatile EchoPinsServer instance;
 

@@ -70,7 +70,12 @@ Access is decided by player UUID, never by name, and is re-checked on the server
 someone presses play — not merely when the marker is shown. Hiding a marker on the client is
 presentation only and is never relied on as a security boundary.
 
-Server operators can play and delete any pin. They can also read the files directly. See below.
+Operator status grants **no** in-game access to a private pin: an operator cannot see it, and
+cannot play it. Moderation is shaped as removal — an operator can delete any pin without listening
+to it.
+
+That said, an operator can still read the audio files directly off the server. See below; the
+protection above is against casual in-game access, not against someone who owns the machine.
 
 ## What the server operator can do
 
@@ -80,15 +85,15 @@ chat log, every book you write, and every sign you place.
 
 Specifically, an operator can:
 
-- listen to any pin, including private ones, through the moderation permission,
-- delete any pin,
+- delete any pin, without being able to play it,
 - copy `<world>/echopins/audio/` off the server and listen to the files elsewhere.
 
 **Do not record anything you would not want the server operator to hear.** If you do not trust the
 operator of a server, do not leave voice messages on it.
 
-Operators deliberately **cannot** edit someone else's pin — no rewriting a caption or flipping a
-private pin to public. Deleting is the honest moderation tool, and it is logged.
+Operators deliberately **cannot** play, edit, or reveal someone else's private pin in game. The
+only moderation action is deletion, which is logged. Anything beyond that means going to the world
+files directly, which is a deliberate act rather than something that happens by standing nearby.
 
 ## How to delete your messages
 

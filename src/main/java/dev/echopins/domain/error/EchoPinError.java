@@ -35,7 +35,9 @@ public enum EchoPinError {
     RECORDING_EXPIRED(20, "error.recording_expired"),
     INTERNAL_ERROR(21, "error.internal_error"),
     /** The general per-player request limiter, as distinct from the create or playback cooldown. */
-    RATE_LIMITED(22, "error.rate_limited");
+    RATE_LIMITED(22, "error.rate_limited"),
+    /** Out of range to play a pin - distinct from not being able to *create* one here. */
+    TOO_FAR_AWAY(23, "error.too_far_away");
 
     private static final EchoPinError[] BY_ID = buildIndex();
 

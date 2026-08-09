@@ -26,11 +26,20 @@ import java.util.Locale;
 public final class RecordingHud implements LayeredDraw.Layer {
 
     /**
-     * Wide enough for the longest hint string in the shipped languages. The hint is the whole
-     * point of the panel for push-to-talk users, so it must not be clipped.
+     * Smallest the panel is ever drawn. The real width is measured from the text, because a fixed
+     * width cannot fit every language: the Russian strings are noticeably longer than the English
+     * ones and were pushed out past the right edge.
      */
-    private static final int PANEL_WIDTH = 150;
+    private static final int MIN_PANEL_WIDTH = 120;
     private static final int PANEL_HEIGHT = 34;
+    /** Gap between the title and the right-aligned timer. */
+    private static final int TITLE_TIMER_GAP = 12;
+    /**
+     * Width reserved for the record dot before the title starts. The dot itself is 8 px wide; the
+     * rest is clearance, because at 8 px + 4 the blinking square sat right against the first
+     * glyph and read as part of the text.
+     */
+    private static final int DOT_COLUMN_WIDTH = 16;
     private static final int MARGIN = 8;
     private static final int PADDING = 6;
 
@@ -54,43 +63,48 @@ public final class RecordingHud implements LayeredDraw.Layer {
             return;
         }
 
-        int screenWidth = graphics.guiWidth();
-        int screenHeight = graphics.guiHeight();
-        int x = anchorX(screenWidth) + EchoPinsClientConfig.HUD_OFFSET_X.get();
-        int y = anchorY(screenHeight) + EchoPinsClientConfig.HUD_OFFSET_Y.get();
-
-        // Clamp so a saved offset from a larger window can never push the panel off-screen.
-        x = Math.max(0, Math.min(x, screenWidth - PANEL_WIDTH));
-        y = Math.max(0, Math.min(y, screenHeight - PANEL_HEIGHT));
-
-        graphics.fill(x, y, x + PANEL_WIDTH, y + PANEL_HEIGHT, COLOR_PANEL);
-        if (EchoPinsClientConfig.HIGH_CONTRAST_RECORDING_INDICATOR.get()) {
-            graphics.renderOutline(x, y, PANEL_WIDTH, PANEL_HEIGHT, COLOR_PANEL_OUTLINE);
-        }
-
         Font font = minecraft.font;
-        int textX = x + PADDING;
-        int textY = y + PADDING;
 
-        drawRecordDot(graphics, textX, textY + 1);
-
-        graphics.drawString(font, Component.translatable("echopins.hud.recording"),
-                textX + 12, textY, COLOR_TEXT, false);
-
-        String elapsed = formatSeconds(recording.elapsedMillis());
-        String total = formatSeconds(recording.maxMillis());
-        String timer = elapsed + " / " + total;
-        graphics.drawString(font, timer,
-                x + PANEL_WIDTH - PADDING - font.width(timer), textY, COLOR_MUTED, false);
-
-        int barY = y + PANEL_HEIGHT - PADDING - 8;
-        drawProgressBar(graphics, textX, barY, PANEL_WIDTH - PADDING * 2, recording);
-
+        Component title = Component.translatable("echopins.hud.recording");
+        String timer = formatSeconds(recording.elapsedMillis()) + " / "
+                + formatSeconds(recording.maxMillis());
         Component hint = recording.receivingAudio()
                 ? Component.translatable("echopins.hud.release_to_stop")
                 // The single most useful thing to say when nothing is arriving: in push-to-talk
                 // the player must also hold their voice chat key.
                 : Component.translatable("echopins.hud.hold_push_to_talk");
+
+        // Measure before drawing. The top row is the record dot, the title, a gap and the timer;
+        // the bottom row is the hint. The panel takes whichever is wider.
+        int topRow = DOT_COLUMN_WIDTH + font.width(title) + TITLE_TIMER_GAP + font.width(timer);
+        int panelWidth = Math.max(MIN_PANEL_WIDTH,
+                Math.max(topRow, font.width(hint)) + PADDING * 2);
+
+        int screenWidth = graphics.guiWidth();
+        int screenHeight = graphics.guiHeight();
+        int x = anchorX(screenWidth, panelWidth) + EchoPinsClientConfig.HUD_OFFSET_X.get();
+        int y = anchorY(screenHeight) + EchoPinsClientConfig.HUD_OFFSET_Y.get();
+
+        // Clamp so a saved offset from a larger window can never push the panel off-screen.
+        x = Math.max(0, Math.min(x, screenWidth - panelWidth));
+        y = Math.max(0, Math.min(y, screenHeight - PANEL_HEIGHT));
+
+        graphics.fill(x, y, x + panelWidth, y + PANEL_HEIGHT, COLOR_PANEL);
+        if (EchoPinsClientConfig.HIGH_CONTRAST_RECORDING_INDICATOR.get()) {
+            graphics.renderOutline(x, y, panelWidth, PANEL_HEIGHT, COLOR_PANEL_OUTLINE);
+        }
+
+        int textX = x + PADDING;
+        int textY = y + PADDING;
+
+        drawRecordDot(graphics, textX, textY + 1);
+        graphics.drawString(font, title, textX + DOT_COLUMN_WIDTH, textY, COLOR_TEXT, false);
+        graphics.drawString(font, timer,
+                x + panelWidth - PADDING - font.width(timer), textY, COLOR_MUTED, false);
+
+        int barY = y + PANEL_HEIGHT - PADDING - 8;
+        drawProgressBar(graphics, textX, barY, panelWidth - PADDING * 2, recording);
+
         graphics.drawString(font, hint, textX, barY + 10,
                 recording.receivingAudio() ? COLOR_MUTED : COLOR_BAR_WARNING, false);
     }
@@ -121,11 +135,11 @@ public final class RecordingHud implements LayeredDraw.Layer {
         }
     }
 
-    private static int anchorX(int screenWidth) {
+    private static int anchorX(int screenWidth, int panelWidth) {
         return switch (EchoPinsClientConfig.HUD_POSITION.get()) {
             case TOP_LEFT, BOTTOM_LEFT -> MARGIN;
-            case TOP_CENTER, BOTTOM_CENTER -> (screenWidth - PANEL_WIDTH) / 2;
-            case TOP_RIGHT, BOTTOM_RIGHT -> screenWidth - PANEL_WIDTH - MARGIN;
+            case TOP_CENTER, BOTTOM_CENTER -> (screenWidth - panelWidth) / 2;
+            case TOP_RIGHT, BOTTOM_RIGHT -> screenWidth - panelWidth - MARGIN;
         };
     }
 

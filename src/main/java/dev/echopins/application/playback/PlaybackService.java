@@ -57,6 +57,17 @@ public final class PlaybackService {
     private final java.util.function.LongSupplier clock;
 
     private final Map<UUID, ActivePlayback> byChannel = new ConcurrentHashMap<>();
+
+    /**
+     * Requests accepted but not yet playing, counted per listener.
+     *
+     * <p>Audio is loaded off-thread, so between accepting a request and registering the channel
+     * there is a window in which {@code byChannel} still shows nothing. Without counting these,
+     * a player could hold the play key and queue an unbounded number of playbacks: every request
+     * saw zero active and passed the limit.
+     */
+    private final Map<UUID, Integer> starting = new ConcurrentHashMap<>();
+
     private final CooldownRateLimiter<UUID> cooldown;
 
     public PlaybackService(ServerLimits limits, PinRepository pins, ReadStateRepository readState,
@@ -97,7 +108,9 @@ public final class PlaybackService {
                     listener + " may not play pin " + pinId);
         }
         if (!anchorResolver.isWithinInteractionRange(player, pin.anchor())) {
-            throw new EchoPinException(EchoPinError.CANNOT_CREATE_HERE,
+            // Not CANNOT_CREATE_HERE: that message talks about placing a pin, which made a
+            // failed playback read as "you can't put an EchoPin here".
+            throw new EchoPinException(EchoPinError.TOO_FAR_AWAY,
                     listener + " is out of range of pin " + pinId);
         }
         if (!voice.isAvailable() || !voice.isPlayerConnected(listener)) {
@@ -126,6 +139,9 @@ public final class PlaybackService {
                     "Dimension " + pin.anchor().dimension() + " is not loaded");
         }
 
+        // Claim the slot before going off-thread, so concurrent requests see it.
+        reserve(listener);
+
         // Decoding happens off the server thread; only the start of playback comes back to it.
         boolean accepted = executors.submitIo(() -> {
             Optional<VoiceRecording> loaded;
@@ -133,17 +149,26 @@ public final class PlaybackService {
                 loaded = audioStore.load(pin.audio().audioId());
             } catch (EpvFormatException e) {
                 LOGGER.warn("Audio for pin {} is damaged: {}", pinId, e.getMessage());
-                server.execute(() -> sendError(player, EchoPinError.AUDIO_DAMAGED));
+                server.execute(() -> {
+                    release(listener);
+                    sendError(player, EchoPinError.AUDIO_DAMAGED);
+                });
                 return;
             } catch (IOException | RuntimeException e) {
                 LOGGER.error("Could not read audio for pin {}", pinId, e);
-                server.execute(() -> sendError(player, EchoPinError.INTERNAL_ERROR));
+                server.execute(() -> {
+                    release(listener);
+                    sendError(player, EchoPinError.INTERNAL_ERROR);
+                });
                 return;
             }
 
             if (loaded.isEmpty() || loaded.get().isEmpty()) {
                 LOGGER.warn("Pin {} references audio {} that is missing", pinId, pin.audio().audioId());
-                server.execute(() -> sendError(player, EchoPinError.AUDIO_DAMAGED));
+                server.execute(() -> {
+                    release(listener);
+                    sendError(player, EchoPinError.AUDIO_DAMAGED);
+                });
                 return;
             }
 
@@ -152,14 +177,17 @@ public final class PlaybackService {
         });
 
         if (!accepted) {
+            release(listener);
             throw new EchoPinException(EchoPinError.INTERNAL_ERROR, "IO queue is saturated");
         }
     }
 
     private void startPlayback(ServerPlayer player, EchoPin pin, ServerLevel level,
                                VoiceRecording recording, boolean operator) {
+        UUID reservationOwner = player.getUUID();
         // The pin may have been deleted while its audio was being read.
         if (pins.find(pin.id()).isEmpty()) {
+            release(reservationOwner);
             sendError(player, EchoPinError.PIN_NOT_FOUND);
             return;
         }
@@ -172,39 +200,31 @@ public final class PlaybackService {
                 pin.anchor().renderPos(),
                 (float) limits.playbackAudioDistance(),
                 channelId,
-                // Evaluated per listener by the voice system. Anyone in earshot who is allowed
-                // to hear the pin does; anyone who is not, does not.
-                candidate -> accessPolicy.canPlay(pin, candidate, isOperator(player, candidate, operator)),
+                // Evaluated per listener by the voice system.
+                //
+                // The operator bypass applies ONLY to the player who deliberately pressed play.
+                // Granting it to bystanders meant any operator standing in earshot heard every
+                // private message automatically - and since a single-player host always has
+                // permission level 4, private pins were effectively public there. Moderation is
+                // an explicit act, not something that leaks to whoever happens to be nearby.
+                candidate -> candidate.equals(listener)
+                        ? accessPolicy.canPlay(pin, candidate, operator)
+                        : accessPolicy.canPlay(pin, candidate, false),
                 recording,
                 () -> onPlaybackFinished(player.getServer(), channelId));
 
         if (handle.isEmpty()) {
+            release(reservationOwner);
             sendError(player, EchoPinError.INTERNAL_ERROR);
             return;
         }
 
         byChannel.put(channelId, new ActivePlayback(pin.id(), listener, handle.get()));
+        release(reservationOwner);
         readState.markRead(listener, pin.id());
         EchoPinsNetwork.sendTo(player, new ClientboundPayloads.PlaybackState(
                 pin.id(), PlaybackPhase.STARTED, recording.durationMillis()));
         LOGGER.debug("Started playback of {} for {} on channel {}", pin.id(), listener, channelId);
-    }
-
-    /**
-     * Operator status is only known for the requesting player. Other listeners are evaluated on
-     * their own merits, which is the conservative choice: a bystander never inherits the
-     * requester's privileges.
-     */
-    private boolean isOperator(ServerPlayer requester, UUID candidate, boolean requesterIsOperator) {
-        if (candidate.equals(requester.getUUID())) {
-            return requesterIsOperator;
-        }
-        MinecraftServer server = requester.getServer();
-        if (server == null) {
-            return false;
-        }
-        ServerPlayer other = server.getPlayerList().getPlayer(candidate);
-        return other != null && other.hasPermissions(limits.operatorPermissionLevel());
     }
 
     /**
@@ -263,6 +283,7 @@ public final class PlaybackService {
             }
         }
         cooldown.forget(listener);
+        starting.remove(listener);
     }
 
     public void shutdown() {
@@ -270,10 +291,19 @@ public final class PlaybackService {
             active.handle().stop();
         }
         byChannel.clear();
+        starting.clear();
+    }
+
+    private void reserve(UUID listener) {
+        starting.merge(listener, 1, Integer::sum);
+    }
+
+    private void release(UUID listener) {
+        starting.computeIfPresent(listener, (key, count) -> count <= 1 ? null : count - 1);
     }
 
     private int countFor(UUID listener) {
-        int count = 0;
+        int count = starting.getOrDefault(listener, 0);
         for (ActivePlayback active : byChannel.values()) {
             if (active.listener().equals(listener) && !active.handle().isFinished()) {
                 count++;

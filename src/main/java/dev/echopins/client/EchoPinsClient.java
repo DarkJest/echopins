@@ -2,6 +2,7 @@ package dev.echopins.client;
 
 import dev.echopins.EchoPins;
 import dev.echopins.client.hud.FocusedPinHud;
+import dev.echopins.client.hud.NowPlayingHud;
 import dev.echopins.client.hud.RecordingHud;
 import dev.echopins.client.keybind.EchoPinsKeybinds;
 import dev.echopins.client.render.PinMarkerRenderer;
@@ -35,6 +36,7 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -71,6 +73,9 @@ public final class EchoPinsClient {
         event.registerAbove(VanillaGuiLayers.CROSSHAIR,
                 ResourceLocation.fromNamespaceAndPath(EchoPins.MOD_ID, "focused_pin"),
                 new FocusedPinHud());
+        event.registerAboveAll(
+                ResourceLocation.fromNamespaceAndPath(EchoPins.MOD_ID, "now_playing"),
+                new NowPlayingHud());
         event.registerAboveAll(
                 ResourceLocation.fromNamespaceAndPath(EchoPins.MOD_ID, "recording"),
                 new RecordingHud());
@@ -153,7 +158,15 @@ public final class EchoPinsClient {
                 minecraft.player.getLookAngle().normalize(),
                 interaction);
         if (focused != null) {
-            requestPlayback(focused.id());
+            togglePlayback(focused.id());
+            return;
+        }
+
+        // Nothing under the crosshair. If something is playing, the obvious meaning of the key is
+        // "stop that", so it does not become a one-way action with no way back.
+        List<PinId> playing = ClientPinState.INSTANCE.playingPins();
+        if (!playing.isEmpty()) {
+            requestStop(playing.get(playing.size() - 1));
             return;
         }
 
@@ -181,7 +194,7 @@ public final class EchoPinsClient {
         }
 
         if (best != null) {
-            requestPlayback(best.id());
+            togglePlayback(best.id());
         } else {
             // Saying nothing at all reads as a broken keybind, so be explicit.
             minecraft.player.displayClientMessage(
@@ -191,6 +204,21 @@ public final class EchoPinsClient {
 
     public static void requestPlayback(PinId pin) {
         EchoPinsNetwork.sendToServer(new ServerboundPayloads.RequestPlayback(pin));
+    }
+
+    public static void requestStop(PinId pin) {
+        EchoPinsNetwork.sendToServer(new ServerboundPayloads.StopPlayback(pin));
+        // Clear locally too, so the indicator reacts immediately rather than after the round trip.
+        ClientPinState.INSTANCE.clearPlaying(pin);
+    }
+
+    /** Plays the pin, or stops it if it is already playing. */
+    private static void togglePlayback(PinId pin) {
+        if (ClientPinState.INSTANCE.isPlaying(pin)) {
+            requestStop(pin);
+        } else {
+            requestPlayback(pin);
+        }
     }
 
     private static void onRenderLevel(RenderLevelStageEvent event) {
@@ -306,7 +334,7 @@ public final class EchoPinsClient {
             // The screen builds its per-entry buttons from the cached page, so it has to be told
             // that a page arrived; otherwise the first page renders rows with no buttons.
             if (Minecraft.getInstance().screen instanceof InboxScreen inbox) {
-                inbox.onPageReceived();
+                inbox.onPageReceived(payload);
             }
         }
 

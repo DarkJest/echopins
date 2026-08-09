@@ -114,6 +114,26 @@ public final class ClientPinState {
         playingUntilMillis.put(id, System.currentTimeMillis() + durationMillis);
     }
 
+    /** Pins currently playing, oldest first. Drives the "now playing" indicator. */
+    public List<PinId> playingPins() {
+        long now = System.currentTimeMillis();
+        playingUntilMillis.entrySet().removeIf(e -> now >= e.getValue());
+        return new ArrayList<>(playingUntilMillis.keySet());
+    }
+
+    /** Milliseconds left on a playback, or 0 if it is not playing. */
+    public long remainingMillis(PinId id) {
+        Long until = playingUntilMillis.get(id);
+        if (until == null) {
+            return 0L;
+        }
+        return Math.max(0L, until - System.currentTimeMillis());
+    }
+
+    public boolean isAnythingPlaying() {
+        return !playingPins().isEmpty();
+    }
+
     public void clearPlaying(PinId id) {
         playingUntilMillis.remove(id);
     }

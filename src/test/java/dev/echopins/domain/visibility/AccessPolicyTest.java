@@ -59,14 +59,37 @@ class AccessPolicyTest {
     }
 
     @Test
-    @DisplayName("Operators can moderate private pins but cannot rewrite them")
-    void operatorCanModerateButNotEdit() {
+    @DisplayName("Operators may remove a private pin but never listen to it")
+    void operatorCanRemoveButNotListen() {
         EchoPin pin = Pins.privatePin(AUTHOR, Set.of(FRIEND));
 
-        assertTrue(POLICY.canDiscover(pin, STRANGER, true));
-        assertTrue(POLICY.canPlay(pin, STRANGER, true));
-        assertTrue(POLICY.canDelete(pin, STRANGER, true));
+        assertTrue(POLICY.canDelete(pin, STRANGER, true), "moderation means being able to remove it");
+        assertFalse(POLICY.canDiscover(pin, STRANGER, true),
+                "operator status must not reveal a private pin");
+        assertFalse(POLICY.canPlay(pin, STRANGER, true),
+                "operator status must not make a private pin audible");
         assertFalse(POLICY.canEdit(pin, STRANGER, true), "editing someone else's pin is not moderation");
+    }
+
+    @Test
+    @DisplayName("A single-player host is an operator and still cannot hear someone else's private pin")
+    void singlePlayerHostGetsNoBypass() {
+        // The host always holds permission level 4, so an operator bypass made private pins
+        // meaningless in the most common way the mod is used.
+        EchoPin pin = Pins.privatePin(AUTHOR, Set.of(FRIEND));
+
+        assertFalse(POLICY.canPlay(pin, STRANGER, true));
+    }
+
+    @Test
+    @DisplayName("A private pin with no recipients is readable only by its author")
+    void privatePinWithoutRecipients() {
+        EchoPin pin = Pins.privatePin(AUTHOR, Set.of());
+
+        assertTrue(POLICY.canPlay(pin, AUTHOR, false));
+        assertFalse(POLICY.canPlay(pin, STRANGER, false));
+        assertFalse(POLICY.canPlay(pin, STRANGER, true), "not even for an operator");
+        assertFalse(POLICY.canDiscover(pin, FRIEND, true));
     }
 
     @Test

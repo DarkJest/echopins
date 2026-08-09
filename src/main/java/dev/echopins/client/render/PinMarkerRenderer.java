@@ -53,6 +53,13 @@ public final class PinMarkerRenderer {
 
     private static final float MIN_ALPHA = 0.06F;
 
+    /** One full ripple cycle while a pin is playing, in milliseconds. */
+    private static final long PLAYBACK_RIPPLE_PERIOD = 1100L;
+    /** How far the ripple expands past the marker at the end of a cycle. */
+    private static final float PLAYBACK_RIPPLE_SCALE = 1.9F;
+    /** Constant enlargement applied while playing, so the state reads without motion too. */
+    private static final float PLAYBACK_MARKER_SCALE = 1.18F;
+
     private PinMarkerRenderer() {
     }
 
@@ -129,6 +136,12 @@ public final class PinMarkerRenderer {
         // Grow slightly with distance so a far marker stays readable without a near one becoming
         // huge; the square root keeps the growth gentle.
         float sizeFactor = (float) (1.0D + Math.sqrt(Math.max(0.0D, distance)) * 0.16D);
+        boolean playing = ClientPinState.INSTANCE.isPlaying(pin.id());
+        if (playing) {
+            // A size change as well as the ripple, so "this one is talking" is not carried by
+            // animation alone - it still reads with reduceMotion on, and without relying on colour.
+            sizeFactor *= PLAYBACK_MARKER_SCALE;
+        }
         float half = BASE_HALF_SIZE * scale * sizeFactor;
         // Uniformly positive on purpose. Scaling a single axis negatively flips the determinant,
         // which reverses triangle winding; the text render type does not disable culling, so the
@@ -149,6 +162,22 @@ public final class PinMarkerRenderer {
         int packedAlpha = (int) (Mth.clamp(alpha, 0.0F, 1.0F) * 255.0F);
         int colour = (packedAlpha << 24) | 0x00FFFFFF;
         int light = 0x00F0_00F0;
+
+        if (playing && !EchoPinsClientConfig.REDUCE_MOTION.get()) {
+            // An expanding, fading copy of the marker behind it: a sound ripple. Drawn first so
+            // the marker itself stays crisp on top.
+            float phase = (System.currentTimeMillis() % PLAYBACK_RIPPLE_PERIOD)
+                    / (float) PLAYBACK_RIPPLE_PERIOD;
+            float rippleScale = 1.0F + phase * (PLAYBACK_RIPPLE_SCALE - 1.0F);
+            float rippleAlpha = alpha * (1.0F - phase) * 0.5F;
+            if (rippleAlpha > 0.01F) {
+                poseStack.pushPose();
+                poseStack.scale(rippleScale, rippleScale, 1.0F);
+                int rippleColour = ((int) (rippleAlpha * 255.0F) << 24) | 0x00FFFFFF;
+                quad(consumer, poseStack.last().pose(), rippleColour, light);
+                poseStack.popPose();
+            }
+        }
 
         quad(consumer, matrix, colour, light);
         poseStack.popPose();
