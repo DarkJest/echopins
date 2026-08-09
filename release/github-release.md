@@ -1,9 +1,21 @@
-# EchoPins 1.0.1
+# EchoPins 1.1.0
+
+**Fabric support.** EchoPins now builds for both loaders from one source tree.
+
+Two jars, one per loader — they are not interchangeable:
+
+- `echopins-neoforge-1.1.0+mc1.21.1.jar` — NeoForge 21.1.0+
+- `echopins-fabric-1.1.0+mc1.21.1.jar` — Fabric Loader 0.19.3+ **and Fabric API**
+
+Both require Minecraft 1.21.1, Java 21 and Simple Voice Chat 2.6.20+ for the matching loader.
+
+Behaviour on NeoForge is unchanged by this release.
+
+---
 
 **Leave a message where it matters.**
 
-The first release of EchoPins — world-anchored asynchronous voice messaging for Minecraft 1.21.1
-on NeoForge.
+World-anchored asynchronous voice messaging for Minecraft 1.21.1, on NeoForge and Fabric.
 
 Record a short voice message, anchor it to a chest, a portal, a machine or just a spot in the
 world, and your friends hear it when they get there. The author does not need to be online.

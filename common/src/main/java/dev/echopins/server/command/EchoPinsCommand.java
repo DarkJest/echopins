@@ -224,8 +224,10 @@ public final class EchoPinsCommand {
 
     private static int reload(CommandSourceStack source) {
         return withServer(source).map(server -> {
-            // Config values are read live, so a reload only needs to re-push the derived values
-            // that clients cache.
+            // Loaders whose config is read live treat this as a no-op; those that hold a snapshot
+            // swap it here. Either way the derived values clients cache have to be re-pushed
+            // afterwards, since a client cannot tell that a limit moved underneath it.
+            server.limits().reload();
             server.sync().broadcastSettings(server.server());
             source.sendSuccess(() -> Component.translatable("echopins.command.reloaded"), true);
             return 1;

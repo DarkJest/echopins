@@ -18,8 +18,11 @@ import java.util.List;
  * payloads exist, how they encode, and what happens when one arrives - lives here once, so the two
  * loaders cannot drift into speaking slightly different protocols.
  *
- * <p>The protocol carries an explicit version, which both loaders check, turning a mismatched
- * client and server into a clear message rather than a decode failure deep inside a payload.
+ * <p>{@link #PROTOCOL_VERSION} is enforced only where the loader can enforce it. NeoForge
+ * negotiates it during login, so a mismatched client is refused with a clear message. Fabric has no
+ * equivalent negotiation, so there a mismatch surfaces later as a decode failure. This is why the
+ * version is bumped rather than reused: on Fabric it is the payload identifiers themselves that
+ * have to change for an incompatible client to be rejected cleanly.
  */
 public final class EchoPinsNetwork {
 

@@ -65,12 +65,13 @@ Then `/echopins admin cleanup` to reclaim any orphaned files.
 ## Markers flicker or disappear behind blocks
 
 That is `occlusionMode`. The default only shows a pin through a wall once you are close enough to
-interact with it. Set `occlusionMode = "NEVER_OCCLUDE"` in `config/echopins-client.toml` if you
+interact with it. Set `occlusionMode` to `NEVER_OCCLUDE` in `config/echopins-client.toml`
+(`echopins-client.json` on Fabric) if you
 prefer them always visible.
 
 ## The recording indicator is in the way
 
-In `config/echopins-client.toml`:
+In `config/echopins-client.toml`, or `config/echopins-client.json` on Fabric:
 
 ```toml
 hudPosition = "TOP_LEFT"
@@ -93,7 +94,7 @@ Look directly at a solid block from close range, or look at open air to drop a f
 ## "Wait N more second(s)…"
 
 `createCooldownSeconds`, or the general per-player request limiter if a lot of requests are being
-sent quickly. Both live in `config/echopins-server.toml`.
+sent quickly. Both live in `config/echopins-server.toml` (`.json` on Fabric).
 
 ## Pins vanished after a restart
 

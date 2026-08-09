@@ -76,7 +76,8 @@ It is most useful on a server where people play at different times. That is what
 | | |
 |---|---|
 | Minecraft | 1.21.1 |
-| Loader | NeoForge 21.1.0+ |
+| Loader | NeoForge 21.1.0+ or Fabric Loader 0.19.3+ |
+| Also required on Fabric | Fabric API |
 | Java | 21 |
 | **Required** | [Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat) for 1.21.1 (2.6.20+) |
 

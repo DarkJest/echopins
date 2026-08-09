@@ -42,9 +42,11 @@ public final class EchoPinsFabricClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> EchoPinsClientCore.onClientTick());
 
-        // AFTER_ENTITIES is the closest Fabric stage to NeoForge's AFTER_PARTICLES: the world is
-        // drawn and the camera is set up, and the HUD still goes on top afterwards.
-        WorldRenderEvents.AFTER_ENTITIES.register(context ->
+        // AFTER_TRANSLUCENT is the closest Fabric stage to the NeoForge build's AFTER_PARTICLES:
+        // both run once translucent terrain is on screen, so a marker seen through water or glass
+        // blends the same way on either loader. Anything from AFTER_ENTITIES onwards is guaranteed
+        // a non-null matrix stack.
+        WorldRenderEvents.AFTER_TRANSLUCENT.register(context ->
                 EchoPinsClientCore.onRenderLevel(context.matrixStack(), context.camera()));
 
         // Fabric has one HUD callback rather than named layers, so the three panels are drawn in

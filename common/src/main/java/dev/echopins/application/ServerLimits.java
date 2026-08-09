@@ -9,6 +9,17 @@ package dev.echopins.application;
  */
 public interface ServerLimits {
 
+    /**
+     * Re-reads the underlying configuration, if the implementation caches it.
+     *
+     * <p>Called by {@code /echopins admin reload}. NeoForge's config is read live and needs no
+     * action, so the default does nothing; the Fabric implementation holds a snapshot and swaps it.
+     * Whatever an implementation does here, the object identity must survive, because the server
+     * captures one {@code ServerLimits} at start-up and holds it for its whole life.
+     */
+    default void reload() {
+    }
+
     boolean enabled();
 
     int maxRecordingSeconds();

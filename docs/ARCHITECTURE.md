@@ -7,8 +7,8 @@
    which is what makes the interesting logic — access control, expiry, indexing, the audio
    container — testable in a plain JVM.
 3. **Client code is physically separate.** Everything that touches rendering lives under
-   `dev.echopins.client` and is reached only through a `Dist.CLIENT` entrypoint, so a dedicated
-   server never loads it.
+   `dev.echopins.client` and is reached only through a client-only entry point — `Dist.CLIENT` on
+   NeoForge, the `client` entrypoint on Fabric — so a dedicated server never loads it.
 4. **Nothing scales with the number of pins.** No per-tick full scan, no per-tick full sync.
 
 ## Project layout
@@ -16,7 +16,7 @@
 EchoPins builds for two loaders from one source tree.
 
 ```
-common/    everything that is not loader-specific - 90 of the 98 source files
+common/    everything that is not loader-specific - 77 of the 92 source files
 neoforge/  NeoForge entry points, config, networking binding, GameTests
 fabric/    Fabric entry points, config, networking binding
 ```
@@ -66,13 +66,12 @@ dev.echopins
 ├── infrastructure/  adapters
 │   ├── persistence/ EchoPinsSavedData, PinNbtCodec, migration/
 │   ├── audio/       FileAudioStore, epv/ (EpvReader, EpvWriter, EpvFormat)
-│   ├── network/     payloads, codecs, registration
-│   ├── config/      ModConfigSpec definitions, ConfigServerLimits
+│   ├── network/     payloads, codecs, the protocol and its routing
 │   └── concurrent/  EchoPinsExecutors
 ├── integration/
 │   └── voicechat/   EchoPinsVoicechatPlugin, SimpleVoiceChatBackend  (the only SVC-aware code)
 ├── server/          composition root, commands
-└── client/          Dist.CLIENT only — render, hud, screen, keybind, state
+└── client/          client-side only — render, hud, screen, keybind, state, EchoPinsClientCore
 ```
 
 Dependency direction is strictly inward: `client`/`server` → `application` → `domain`.
@@ -82,7 +81,7 @@ Dependency direction is strictly inward: `client`/`server` → `application` →
 
 ```mermaid
 flowchart TB
-    subgraph Client["Client (Dist.CLIENT only)"]
+    subgraph Client["Client (client-side only)"]
         KB[Keybinds]
         HUD[RecordingHud / FocusedPinHud]
         REN[PinMarkerRenderer]
@@ -90,7 +89,7 @@ flowchart TB
         CS[(ClientPinState)]
     end
 
-    subgraph Net["NeoForge payloads (protocol v1)"]
+    subgraph Net["Payloads (protocol v1, shared by both loaders)"]
         SB[Serverbound<br/>BeginRecording, FinishRecording, CancelRecording,<br/>CreatePin, RequestPlayback, DeletePin,<br/>RequestInbox, MarkRead]
         CB[Clientbound<br/>ServerSettings, PinsSnapshot, PinsDelta,<br/>RecordingState, PlaybackState,<br/>ErrorMessage, InboxPage, KnownPlayers]
     end
@@ -145,7 +144,7 @@ flowchart TB
 ```mermaid
 flowchart LR
     API[[Simple Voice Chat<br/>plugin API]]
-    PLUG[EchoPinsVoicechatPlugin<br/>@ForgeVoicechatPlugin]
+    PLUG[EchoPinsVoicechatPlugin<br/>found by annotation or entrypoint]
     ADPT[SimpleVoiceChatBackend<br/>implements VoiceBackend]
     REC[RecordingService<br/>MicrophoneCapture]
     PLAY[PlaybackService]
@@ -160,9 +159,11 @@ flowchart LR
 
 Two things worth calling out:
 
-- **Simple Voice Chat constructs the plugin**, not EchoPins. It scans NeoForge mod files for the
-  `@ForgeVoicechatPlugin` annotation and instantiates the class through its no-arg constructor.
-  All state therefore lives in the singleton adapter, and the annotated class is a thin forwarder.
+- **Simple Voice Chat constructs the plugin**, not EchoPins. On NeoForge it scans mod files for
+  the `@ForgeVoicechatPlugin` annotation; on Fabric it reads the `voicechat_plugins` entrypoint.
+  Either way it instantiates the class through its no-arg constructor, so all state lives in the
+  singleton adapter and the discovered class is a thin forwarder. This is the one place where the
+  two loaders each need their own class, and it is why that class contains no logic.
 - **Audio is never transcoded.** `AudioChannel.send(byte[])` accepts encoded Opus, so frames go
   microphone → disk → channel unchanged. No decode/re-encode round trip, no generational quality
   loss, and playback costs almost nothing.
@@ -276,8 +277,8 @@ column, so the cost is proportional to the searched area rather than to the numb
 
 Rules that keep this safe:
 
-- Payload handlers run on the main thread (NeoForge's default), so they may touch world state
-  directly.
+- Payload handlers run on the main thread — NeoForge's default, and Fabric's guarantee — so they
+  may touch world state directly.
 - Anything read or written on the IO pool comes back via `server.execute(...)` before touching
   shared state or sending packets.
 - `RecordingSession` is the one object mutated from two threads, and its frame buffer is guarded.

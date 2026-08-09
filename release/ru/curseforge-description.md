@@ -63,7 +63,8 @@ EchoPins это решает. Запишите короткое голосово
 | | |
 |---|---|
 | Minecraft | 1.21.1 |
-| Загрузчик | NeoForge 21.1.0+ |
+| Загрузчик | NeoForge 21.1.0+ или Fabric Loader 0.19.3+ |
+| Дополнительно для Fabric | Fabric API |
 | Java | 21 |
 | **Обязательно** | [Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat) для 1.21.1 (2.6.20+) |
 

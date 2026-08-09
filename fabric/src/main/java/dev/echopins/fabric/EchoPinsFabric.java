@@ -8,6 +8,7 @@ import dev.echopins.server.EchoPinsServer;
 import dev.echopins.server.command.EchoPinsCommand;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -41,8 +42,17 @@ public final class EchoPinsFabric implements ModInitializer {
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
                 EchoPinsServer.current().ifPresent(echoPins -> echoPins.onPlayerLeft(handler.player)));
 
-        // Fabric reports a dimension change and a respawn through the same callback; the boolean
-        // says which, and both mean the player is no longer where their recording was anchored.
+        // Unlike NeoForge, Fabric does not fold dimension changes into the respawn callback:
+        // AFTER_RESPAWN fires only for a respawn, so travelling through a portal needs its own
+        // event. Without this a player arriving in the Nether would keep the Overworld's pins
+        // until a delta sync happened to correct it.
+        ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(
+                (player, origin, destination) ->
+                        EchoPinsServer.current().ifPresent(echoPins ->
+                                echoPins.onDimensionChanged(player)));
+
+        // Respawn after death: the player is somewhere else now, so an open recording is no longer
+        // anchored to anything meaningful.
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) ->
                 EchoPinsServer.current().ifPresent(echoPins -> {
                     echoPins.onPlayerDied(newPlayer);

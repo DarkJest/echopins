@@ -33,29 +33,40 @@ Do not tag **Adventure and RPG**, **World Gen**, **Technology**, or **Magic**. N
 | Field | Value |
 |---|---|
 | Minecraft | `1.21.1` |
-| Modloader | `NeoForge` |
+| Modloader | `NeoForge` **and** `Fabric` |
 | Java | `Java 21` |
 | Environment | Client **and** Server |
 
+Each uploaded file carries only its own loader tag. Do not tag the NeoForge jar as Fabric or the
+other way round: CurseForge uses these tags to decide what a launcher installs, and a wrong tag
+hands the user a jar their loader cannot read.
+
 ## Relations (dependencies)
 
-| Project | Type |
-|---|---|
-| Simple Voice Chat | **Required Dependency** |
+| Project | Type | Applies to |
+|---|---|---|
+| Simple Voice Chat | **Required Dependency** | both files |
+| Fabric API | **Required Dependency** | the Fabric file only |
 
-This must be set explicitly. CurseForge does not infer it, and without it the launcher will not
-pull Simple Voice Chat into a pack, which produces a missing-dependency screen for the user.
+These must be set explicitly. CurseForge does not infer them, and without them the launcher will
+not pull the dependency into a pack, which produces a missing-dependency screen for the user.
+
+Relations are set **per file**, so the Fabric API relation goes on the Fabric upload only.
 
 No optional, embedded, incompatible or tool relations.
 
 ## File upload
 
-| Field | Value |
-|---|---|
-| File | `echopins-1.0.0+mc1.21.1-neoforge.jar` |
-| Display name | `EchoPins 1.0.0 (MC 1.21.1, NeoForge)` |
-| Release type | see below |
-| Changelog | contents of `curseforge-changelog.md`, markdown |
+Two files per release, uploaded separately.
+
+| Field | NeoForge | Fabric |
+|---|---|---|
+| File | `echopins-neoforge-1.1.0+mc1.21.1.jar` | `echopins-fabric-1.1.0+mc1.21.1.jar` |
+| Display name | `EchoPins 1.1.0 (MC 1.21.1, NeoForge)` | `EchoPins 1.1.0 (MC 1.21.1, Fabric)` |
+| Modloader tag | `NeoForge` | `Fabric` |
+| Dependencies | Simple Voice Chat | Simple Voice Chat, Fabric API |
+| Release type | see below | see below |
+| Changelog | contents of `curseforge-changelog.md`, markdown | same |
 
 ### Release type
 
@@ -66,7 +77,8 @@ Pick based on what has actually been verified:
 - **Beta** — build and unit tests pass, multi-client testing not yet done. Version the artifact
   `0.1.0-beta` in that case.
 
-As of writing, multi-client testing has **not** been performed. Upload as **Beta**.
+As of writing, multi-client testing has **not** been performed, and the Fabric build has not been
+run in game at all. Upload as **Beta**.
 
 ## Modpack permission
 

@@ -39,7 +39,7 @@ first impression.
 > • Messages expire on their own so your world save doesn't grow forever
 > • Full EN + RU translations
 >
-> Minecraft 1.21.1 · NeoForge · needs Simple Voice Chat on both sides
+> Minecraft 1.21.1 · NeoForge & Fabric · needs Simple Voice Chat on both sides
 >
 > One thing worth knowing up front: it records your voice, and that audio lives on the server
 > where whoever owns the machine can read it. That's spelled out properly in the privacy doc rather than
@@ -52,7 +52,7 @@ first impression.
 ## Reddit post
 
 **Title:** EchoPins — leave short voice messages anchored to places in your world (1.21.1,
-NeoForge)
+NeoForge & Fabric)
 
 **Body:**
 
@@ -90,7 +90,7 @@ NeoForge)
 > in the privacy doc in plain language, because it's a real thing players should know rather than
 > something to gloss over.
 >
-> Requires Simple Voice Chat. 1.21.1, NeoForge, both sides. MIT licensed, source linked below.
+> Requires Simple Voice Chat. 1.21.1, NeoForge or Fabric, both sides. MIT licensed, source linked below.
 >
 > Happy to answer questions about how it's built — the audio container and the sync layer were the
 > interesting parts.
@@ -110,7 +110,7 @@ drive-by link post reads as spam.*
 > EchoPins lets you leave a short voice message stuck to a place in your Minecraft world. Your
 > friends hear it when they get there — online or not.
 >
-> 1.21.1 · NeoForge · Simple Voice Chat
+> 1.21.1 · NeoForge / Fabric · Simple Voice Chat
 >
 > https://modrinth.com/mod/echopins
 
@@ -123,7 +123,7 @@ Alternative, shorter:
 > EchoPins: record a note, stick it to a chest, a portal, a fork in a mine. Your friends hear it
 > when they arrive.
 >
-> Minecraft 1.21.1 · NeoForge
+> Minecraft 1.21.1 · NeoForge & Fabric
 > https://modrinth.com/mod/echopins
 
 ---
@@ -164,7 +164,7 @@ people who install it expecting a bigger mod.
 > Source: https://github.com/DarkJest/echopins
 >
 > ⚙️ Requirements
-> Minecraft 1.21.1 · NeoForge 21.1+ · Java 21
+> Minecraft 1.21.1 · NeoForge 21.1+ or Fabric Loader 0.19.3+ · Java 21
 > Simple Voice Chat (required, on both client and server)
 >
 > 🎙️ A note on push-to-talk
@@ -198,7 +198,7 @@ people who install it expecting a bigger mod.
 EchoPins
 Leave a message where it matters.
 
-Minecraft 1.21.1 · NeoForge · Simple Voice Chat
+Minecraft 1.21.1 · NeoForge / Fabric · Simple Voice Chat
 ```
 
 **Production notes**

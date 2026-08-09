@@ -50,7 +50,8 @@ Friends see a small marker when they get close and press one key to listen.
 |  |  |
 | --- | --- |
 | **Minecraft** | 1.21.1 |
-| **Loader** | NeoForge 21.1.0+ |
+| **Loader** | NeoForge 21.1.0+ or Fabric Loader 0.19.3+ |
+| **Also required on Fabric** | Fabric API |
 | **Java** | 21 |
 | **Required mod** | Simple Voice Chat 2.6.20+ for 1.21.1 |
 | **Sides** | Client **and** server |
