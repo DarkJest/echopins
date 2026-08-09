@@ -1,4 +1,4 @@
-# EchoPins 1.0.0
+# EchoPins 1.0.1
 
 **Leave a message where it matters.**
 
@@ -102,9 +102,10 @@ Drop Simple Voice Chat and EchoPins into `mods/` on both sides. Start the server
   supported way to start capture from outside. Reaching into its internals would be fragile and a
   privacy problem, so EchoPins does not. The recording HUD explains this and reports whether audio
   is actually arriving.
-- Audio is stored unencrypted inside the world save. Server operators can listen to it. This is
-  stated plainly in [PRIVACY.md](PRIVACY.md) rather than glossed over — the server has to decrypt
-  audio to play it, so encryption would imply a protection that does not exist.
+- Audio is stored unencrypted inside the world save. Operator status grants no in-game access to a
+  private pin, but anyone who can read the server's files can read the audio. This is stated
+  plainly in [PRIVACY.md](PRIVACY.md) rather than glossed over — the server has to decrypt audio
+  to play it, so encryption would imply a protection that does not exist.
 - Simple Voice Chat is the only supported backend in 1.0, though the adapter seam for others
   exists.
 - Images in the README and on the mod pages are labelled **UI mockups**, built from the real
@@ -116,7 +117,7 @@ Drop Simple Voice Chat and EchoPins into `mods/` on both sides. Start the server
 ## Privacy
 
 EchoPins records voice. Recording only happens while you hold the key, only captures your own
-voice, is always visibly indicated, and is stored on the server where the operator can access it.
+voice, is always visibly indicated, and is stored on the server, where anyone with access to its files can read it.
 Full detail in [PRIVACY.md](PRIVACY.md).
 
 ## Checksums

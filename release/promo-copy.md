@@ -42,7 +42,7 @@ first impression.
 > Minecraft 1.21.1 · NeoForge · needs Simple Voice Chat on both sides
 >
 > One thing worth knowing up front: it records your voice, and that audio lives on the server
-> where the operator can hear it. That's spelled out properly in the privacy doc rather than
+> where whoever owns the machine can read it. That's spelled out properly in the privacy doc rather than
 > buried.
 >
 > https://modrinth.com/mod/echopins
@@ -86,7 +86,7 @@ NeoForge)
 > reaching into its internals, but that's both fragile and exactly the kind of thing you don't
 > want a mod doing with your microphone. The HUD tells you when no audio is arriving.
 >
-> And the audio sits unencrypted in the world save, so server operators can listen to it. That's
+> And the audio sits unencrypted in the world save, so whoever owns the server can read it. That's
 > in the privacy doc in plain language, because it's a real thing players should know rather than
 > something to gloss over.
 >

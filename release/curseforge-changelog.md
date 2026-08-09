@@ -1,4 +1,4 @@
-# EchoPins 1.0.0
+# EchoPins 1.0.1
 
 First release. Minecraft 1.21.1, NeoForge, requires Simple Voice Chat 2.6.20+.
 

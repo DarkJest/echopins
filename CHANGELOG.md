@@ -9,15 +9,79 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Nothing yet.
 
+## [1.0.1] — 2026-08-09
+
+The first build published to Modrinth and CurseForge. `1.0.0` was tagged but never released;
+everything below was found by playing the mod and fixed before anything shipped.
+
+### Fixed
+
+**Private pins**
+
+- Operator status no longer bypasses discovery or playback. A private pin is readable only by its
+  author and the recipients they named. The previous bypass made private pins meaningless wherever
+  staff are online, and entirely meaningless in single player, where the host always holds
+  permission level 4. Moderation is now shaped as removal: an operator can delete any pin without
+  being able to listen to it.
+- The per-listener audience filter no longer granted bystanders the requesting player's privileges.
+
+**Playback**
+
+- The concurrency limit was checked before the audio load was registered, so repeated presses
+  queued an unbounded number of playbacks. Slots are now reserved synchronously.
+- Playback can be stopped: the play key toggles, and the inbox offers Stop.
+- Expired pins are now retracted from clients. The removal list is derived from what the client
+  was told about, and the pin was being dropped from that set before the delta was computed, so
+  markers for expired pins stayed on screen until the player reconnected.
+- Delta synchronisation never ran at all: the "never synced" sentinel was `Long.MIN_VALUE`, and
+  subtracting it overflowed, so the throttle always concluded no time had passed. New pins only
+  appeared after a relog.
+- Out-of-range playback reported "you can't create a pin here"; it now has its own message.
+- A player could not replay their own message, because the play action filtered on unread state
+  and creating a pin marks it read for its author.
+- Playback completion is reported to the client, so the indicator no longer lingers.
+
+**Interface**
+
+- World markers never rendered: a negative axis scale reversed triangle winding, and the render
+  type does not disable culling, so every marker quad was silently discarded.
+- Screens painted their panel after `Screen.render` had already drawn every widget, leaving
+  buttons invisible though still clickable.
+- Inbox rows overflowed onto the pager and Done button and swallowed their clicks.
+- Inbox rows now show the caption, and the distance to each pin; Play is greyed out for anything
+  out of reach.
+- Indicator dots overlapped the text beside them. Both HUDs now size themselves from their
+  content, which also stops longer translations running past the panel edge.
+
+**Other**
+
+- A recording is no longer destroyed when the create cooldown refuses it, and the audio for a
+  rejected pin is actually deleted rather than left for the orphan sweep.
+- A recording stored while its author was disconnecting is discarded instead of leaking.
+- A voice chat disconnect now ends an open recording immediately instead of after the silence
+  timeout.
+- The general request limiter reported the create-cooldown message for every throttled action.
+- `error.create_cooldown` was sent without the argument its translation expects, so players saw a
+  literal `%s`.
+
+### Added
+
+- A "now playing" indicator showing which pin is playing and how long is left.
+- Markers show playback with a size change and an expanding ripple.
+- Default binding for the play key (`R`); it was previously unbound while the interface told
+  players to press it.
+
 ## [1.0.0] — 2026-08-09
 
-First release. Minecraft 1.21.1, NeoForge, requires Simple Voice Chat.
+Tagged but never published. Superseded by 1.0.1.
+
+First release content. Minecraft 1.21.1, NeoForge, requires Simple Voice Chat.
 
 **Artifact**
 
 ```
-echopins-1.0.0+mc1.21.1-neoforge.jar
-SHA-256: a28127758a38ece15af6796b8e1c1aae877ddfa7ff7685bc7a4a5cd34e148aec
+echopins-1.0.1+mc1.21.1-neoforge.jar
+SHA-256: b9632788f1357239a19e97cd7d99e976e20bca60636a0cac3cc7fbc3b46e553f
 ```
 
 Built against NeoForge 21.1.248 and `voicechat-api` 2.6.20. The build is reproducible: two clean
@@ -86,8 +150,9 @@ release workflow publishes, since that is built from the tagged commit.
   Chat's public API exposes microphone audio only once it is already transmitting, and there is no
   supported way to start capture from outside. The HUD says so while recording and reports whether
   audio is arriving. See the README for the full explanation.
-- Audio is stored unencrypted inside the world save. Server operators can read it. This is
-  documented rather than papered over — see `PRIVACY.md`.
+- Audio is stored unencrypted inside the world save. Operator status grants no in-game access to a
+  private pin, but anyone who can read the server's files can read the audio. Documented rather
+  than papered over — see `PRIVACY.md`.
 - Simple Voice Chat is the only supported backend in 1.0, though the adapter seam for others
   exists.
 - Screenshots shipped with this release are labelled UI mockups; real in-game captures are still
@@ -95,5 +160,6 @@ release workflow publishes, since that is built from the tagged commit.
 - The manual integration matrix in `docs/TESTING.md` has not been executed end to end on a live
   multi-client server.
 
-[Unreleased]: https://github.com/DarkJest/echopins/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/DarkJest/echopins/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/DarkJest/echopins/releases/tag/v1.0.1
 [1.0.0]: https://github.com/DarkJest/echopins/releases/tag/v1.0.0
