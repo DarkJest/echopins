@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": ["${mod_authors}"],
+  "contact": {
+    "homepage": "https://github.com/DarkJest/echopins",
+    "sources": "https://github.com/DarkJest/echopins",
+    "issues": "https://github.com/DarkJest/echopins/issues"
+  },
+  "license": "${mod_license}",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["dev.echopins.fabric.EchoPinsFabric"],
+    "client": ["dev.echopins.fabric.client.EchoPinsFabricClient"],
+    "voicechat_plugins": ["dev.echopins.fabric.voicechat.EchoPinsFabricVoicechatPlugin"]
+  },
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "minecraft": "${minecraft_version_range}",
+    "java": ">=${java_version}",
+    "fabric-api": "*",
+    "voicechat": ">=${voicechat_api_version}"
+  }
+}

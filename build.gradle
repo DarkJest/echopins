@@ -1,152 +1,73 @@
-plugins {
-    id 'java-library'
-    id 'idea'
-    id 'net.neoforged.moddev' version '2.0.143'
-}
+// Settings shared by both loader projects. `common` is a plain source directory rather than a
+// subproject, because it has no loader and so nothing to compile Minecraft against by itself.
+subprojects {
+    apply plugin: 'java'
 
-version = mod_version
-group = mod_group_id
+    version = mod_version
+    group = mod_group_id
 
-base {
-    archivesName = mod_id
-}
-
-// Produces `echopins-<version>+mc1.21.1-neoforge.jar`. The build metadata lives in the archive
-// version rather than the base name so Gradle does not append the raw version a second time.
-tasks.withType(AbstractArchiveTask).configureEach {
-    archiveVersion = "${mod_version}+mc${minecraft_version}-neoforge"
-}
-
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(Integer.parseInt(java_version))
-    withSourcesJar()
-}
-
-repositories {
-    mavenCentral()
-    maven {
-        name = 'Simple Voice Chat'
-        url = 'https://maven.maxhenkel.de/repository/public'
-        content { includeGroup 'de.maxhenkel.voicechat' }
+    java {
+        toolchain.languageVersion = JavaLanguageVersion.of(Integer.parseInt(java_version))
+        withSourcesJar()
     }
-    maven {
-        name = 'Modrinth'
-        url = 'https://api.modrinth.com/maven'
-        content { includeGroup 'maven.modrinth' }
-    }
-}
 
-neoForge {
-    version = project.neo_version
-
-    runs {
-        configureEach {
-            systemProperty 'forge.logging.markers', ''
-            logLevel = org.slf4j.event.Level.INFO
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'Simple Voice Chat'
+            url = 'https://maven.maxhenkel.de/repository/public'
+            content { includeGroup 'de.maxhenkel.voicechat' }
         }
-        client {
-            client()
-        }
-        server {
-            server()
-            programArgument '--nogui'
-        }
-        gameTestServer {
-            type = 'gameTestServer'
-            // Without this NeoForge enables no namespaces and the run reports zero tests while
-            // still exiting successfully, which looks like a pass.
-            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
-        }
-        data {
-            data()
+        maven {
+            name = 'Modrinth'
+            url = 'https://api.modrinth.com/maven'
+            content { includeGroup 'maven.modrinth' }
         }
     }
 
-    mods {
-        "${mod_id}" {
-            sourceSet sourceSets.main
+    sourceSets {
+        // Both loaders compile the shared sources themselves. Mojang mappings on both sides mean
+        // the same source is valid for each.
+        main {
+            java.srcDir rootProject.file('common/src/main/java')
+            resources.srcDir rootProject.file('common/src/main/resources')
+        }
+        test {
+            java.srcDir rootProject.file('common/src/test/java')
         }
     }
-}
 
-dependencies {
-    // Provided at runtime by the Simple Voice Chat mod jar, which ships the `voicechat_api` mod.
-    // Must never be bundled into our jar.
-    compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
-
-    // Dev-runtime only: puts the real Simple Voice Chat mod on the classpath for
-    // `runClient` / `runServer` so the integration can actually be exercised.
-    runtimeOnly "maven.modrinth:simple-voice-chat:${voicechat_dev_runtime_version}"
-
-    testImplementation platform('org.junit:junit-bom:5.11.4')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    // NeoForge supplies SLF4J in-game, but these tests run in a plain JVM with no mod loader,
-    // so the API and a binding have to be on the test classpath explicitly. Version matches the
-    // one Minecraft 1.21.1 ships.
-    testImplementation 'org.slf4j:slf4j-api:2.0.9'
-    testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.9'
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-    options.release = Integer.parseInt(java_version)
-    // `this-escape` and `deprecation` fire constantly on Minecraft superclasses (Screen, etc.)
-    // and would drown out warnings that are actually ours, so they are excluded rather than
-    // promoted to errors.
-    options.compilerArgs << '-Xlint:all,-processing,-serial,-this-escape,-deprecation'
-}
-
-tasks.withType(Javadoc).configureEach {
-    options.encoding = 'UTF-8'
-    options.addStringOption('Xdoclint:none', '-quiet')
-}
-
-tasks.withType(ProcessResources).configureEach {
-    var replaceProperties = [
-            minecraft_version           : minecraft_version,
-            minecraft_version_range     : minecraft_version_range,
-            neo_version                 : neo_version,
-            neo_version_range           : neo_version_range,
-            loader_version_range        : loader_version_range,
-            voicechat_api_version_range : voicechat_api_version_range,
-            mod_id                      : mod_id,
-            mod_name                    : mod_name,
-            mod_license                 : mod_license,
-            mod_version                 : mod_version,
-            mod_authors                 : mod_authors,
-            mod_description             : mod_description,
-    ]
-    inputs.properties replaceProperties
-    filesMatching(['META-INF/neoforge.mods.toml']) {
-        expand replaceProperties
+    dependencies {
+        testImplementation platform('org.junit:junit-bom:5.11.4')
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+        // NeoForge and Fabric both supply SLF4J in game, but the tests run in a plain JVM.
+        testImplementation 'org.slf4j:slf4j-api:2.0.9'
+        testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.9'
     }
-}
 
-test {
-    useJUnitPlatform()
-    testLogging {
-        events 'passed', 'skipped', 'failed'
-        exceptionFormat 'full'
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = Integer.parseInt(java_version)
+        options.compilerArgs << '-Xlint:all,-processing,-serial,-this-escape,-deprecation'
     }
-}
 
-// Deterministic archives: no timestamps, stable file order.
-tasks.withType(AbstractArchiveTask).configureEach {
-    preserveFileTimestamps = false
-    reproducibleFileOrder = true
-}
+    tasks.withType(Javadoc).configureEach {
+        options.encoding = 'UTF-8'
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
 
-jar {
-    manifest {
-        attributes([
-                'Specification-Title'     : mod_name,
-                'Specification-Vendor'    : mod_authors,
-                'Specification-Version'   : '1',
-                'Implementation-Title'    : mod_name,
-                'Implementation-Version'  : mod_version,
-                'Implementation-Vendor'   : mod_authors,
-        ])
+    test {
+        useJUnitPlatform()
+        testLogging {
+            events 'passed', 'skipped', 'failed'
+            exceptionFormat 'full'
+        }
+    }
+
+    // Deterministic archives: no timestamps, stable file order.
+    tasks.withType(AbstractArchiveTask).configureEach {
+        preserveFileTimestamps = false
+        reproducibleFileOrder = true
     }
 }

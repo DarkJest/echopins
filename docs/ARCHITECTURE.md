@@ -11,6 +11,36 @@
    server never loads it.
 4. **Nothing scales with the number of pins.** No per-tick full scan, no per-tick full sync.
 
+## Project layout
+
+EchoPins builds for two loaders from one source tree.
+
+```
+common/    everything that is not loader-specific - 90 of the 98 source files
+neoforge/  NeoForge entry points, config, networking binding, GameTests
+fabric/    Fabric entry points, config, networking binding
+```
+
+`common` is not a Gradle subproject: with no loader it has no Minecraft to compile against. Each
+loader project adds `common/src/main/java` as a source directory and compiles it against its own
+remapped Minecraft. **Both use Mojang mappings**, which is what makes the same source valid for
+each without a mapping-translation layer or an extra plugin.
+
+Only a handful of things genuinely differ between the loaders, and each is behind a small seam:
+
+| Difference | Seam |
+|---|---|
+| Entry points and lifecycle events | Each loader has its own; both call the same services |
+| Payload registration and packet transport | `EchoPinsNetwork.Transport` plus a shared payload list |
+| Server configuration | `ServerLimits` (NeoForge config vs. JSON on Fabric) |
+| Client configuration | `ClientSettings` (same split) |
+| Default values | `EchoPinsServerDefaults` / `EchoPinsDefaults`, shared by both |
+| Keybinds | Declared once with the vanilla constructor, registered per loader |
+| HUD and world-render hooks | Loader callbacks calling `EchoPinsClientCore` |
+
+The protocol itself - which payloads exist and how they encode - lives once in `EchoPinsNetwork`,
+so the two builds cannot drift into speaking slightly different wire formats.
+
 ## Layers
 
 ```
