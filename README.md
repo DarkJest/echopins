@@ -73,7 +73,7 @@ Your friends see a small marker when they get close, and press one key to listen
 | | |
 |---|---|
 | Minecraft | 1.21.1 |
-| Loader | NeoForge 21.1.0 or newer |
+| Loader | NeoForge 21.1.0+ or Fabric Loader 0.19.3+ |
 | Java | 21 |
 | Required mod | [Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat) for 1.21.1 (2.6.20+) |
 | Sides | **Client and server** — both need EchoPins and Simple Voice Chat |
@@ -88,9 +88,9 @@ Your friends see a small marker when they get close, and press one key to listen
 
 ### Server
 
-1. Install NeoForge 21.1.x.
+1. Install NeoForge 21.1.x or Fabric Loader (plus Fabric API).
 2. Drop **Simple Voice Chat** and **EchoPins** into `mods/`.
-3. Start the server once to generate `config/echopins-server.toml`.
+3. Start the server once to generate `config/echopins-server.toml` (`.json` on Fabric).
 4. Read [docs/SERVER_SETUP.md](docs/SERVER_SETUP.md) before opening it to the public.
 
 EchoPins is required on both sides. A client without it will be rejected at the protocol
@@ -129,7 +129,7 @@ Full detail, including how to delete your messages and how admins wipe voice sto
 
 ## Server configuration
 
-Everything is in `config/echopins-server.toml`. The defaults are chosen so that an untouched
+Everything is in `config/echopins-server.toml`, or `config/echopins-server.json` on Fabric. The defaults are chosen so that an untouched
 install cannot be used to fill a disk: pins expire after a week, total storage is capped at 1 GiB,
 and both creating and playing are rate limited.
 

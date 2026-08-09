@@ -6,7 +6,9 @@
 ./gradlew build
 ```
 
-Runs compilation and the JUnit 5 suite. The suite covers the pure-Java layers, which is where the
+Compiles both loaders and runs the JUnit 5 suite. The shared sources are compiled twice — once
+against NeoForge's Minecraft and once against Fabric's — so the suite runs once per loader and a
+change that breaks either build fails here rather than in a user's game. The suite covers the pure-Java layers, which is where the
 logic that actually matters lives:
 
 | Area | Covered |
@@ -22,9 +24,26 @@ logic that actually matters lives:
 **Not covered automatically:** anything requiring a running Minecraft server or a live Simple Voice
 Chat connection. That is what the matrix below is for.
 
+### GameTests
+
+```bash
+./gradlew :neoforge:runGameTestServer
+```
+
+Six tests covering the parts that need a real server: saved-data round trip, spatial queries
+against a live level, expiry sweeps, and audio-store accounting.
+
+These live in the NeoForge project only. Everything they exercise is shared code, so they are a
+check on the mod rather than on the loader — but note that they therefore say nothing about the
+Fabric build's wiring, which is covered only by the manual matrix below.
+
 ## Manual integration test matrix
 
 Legend: ☐ untested · ✅ pass · ❌ fail
+
+> Run the matrix once per loader. The seams that differ between NeoForge and Fabric — entry
+> points, config, packet transport, dimension-change and respawn events, HUD and world-render
+> hooks — are exactly the parts no automated test here covers.
 
 ### Client / server topologies
 
@@ -32,6 +51,7 @@ Legend: ☐ untested · ✅ pass · ❌ fail
 |---|---|
 | Single player | ☐ |
 | Dedicated NeoForge server, 1 client | ☐ |
+| Dedicated Fabric server, 1 client | ☐ |
 | Dedicated server, 2 clients | ☐ |
 | Dedicated server, 3+ clients | ☐ |
 | Client without EchoPins joining an EchoPins server | ☐ |
@@ -118,6 +138,7 @@ person playing it.
 | Scenario | Status |
 |---|---|
 | Alongside a large NeoForge 1.21.1 pack (100+ mods) | ☐ |
+| Alongside a large Fabric 1.21.1 pack (100+ mods) | ☐ |
 | Alongside another Simple Voice Chat plugin | ☐ |
 | With shaders (Iris/Oculus) | ☐ |
 | With a minimap mod | ☐ |

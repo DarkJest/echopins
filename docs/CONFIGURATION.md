@@ -1,14 +1,31 @@
 # Configuration
 
-Two files, generated on first run:
+Two files, generated on first run. The format follows the loader:
 
-| File | Scope |
-|---|---|
-| `config/echopins-server.toml` | Limits, security, storage. Authoritative. |
-| `config/echopins-client.toml` | Rendering, HUD, accessibility. Per player. |
+| Scope | NeoForge | Fabric |
+|---|---|---|
+| Limits, security, storage. Authoritative. | `config/echopins-server.toml` | `config/echopins-server.json` |
+| Rendering, HUD, accessibility. Per player. | `config/echopins-client.toml` | `config/echopins-client.json` |
 
-Values are read **live**. Editing the server file takes effect immediately; run
-`/echopins admin reload` afterwards so clients stop showing stale limits in their UI.
+**The options, their names, their defaults and their permitted ranges are identical on both
+loaders** — they come from one shared table in the source, so the two builds cannot drift. Only the
+file syntax differs. The tables below are written as TOML; the Fabric file is flat JSON with the
+same key names and no section headers, so `maxRecordingSeconds` under `[recording]` is simply
+`"maxRecordingSeconds": 30` at the top level.
+
+An unknown key is ignored and a missing one falls back to its default, so a file written by an
+older or newer version still loads. Out-of-range values are clamped rather than rejected.
+
+### When edits take effect
+
+| | NeoForge | Fabric |
+|---|---|---|
+| Server file | Read live; edits apply immediately | Read at start-up; `/echopins admin reload` re-reads it |
+| Client file | Read live | Read at start-up; restart the game |
+
+Run `/echopins admin reload` after editing the server file on **either** loader: on Fabric it
+re-reads the file, and on both it re-pushes the derived values clients cache, so nobody is left
+looking at a stale limit in their UI.
 
 **A client can never raise a server limit.** The client file only makes a player's own view more
 restrictive.

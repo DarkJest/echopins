@@ -23,7 +23,8 @@ mods/
 └── echopins-<version>+mc1.21.1-neoforge.jar
 ```
 
-Start once, stop, then edit `config/echopins-server.toml`.
+Start once, stop, then edit `config/echopins-server.toml` — or `config/echopins-server.json` if
+you are running Fabric. Same options, same defaults, different file format.
 
 Confirm in the log:
 

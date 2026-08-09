@@ -9,6 +9,50 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Nothing yet.
 
+## [1.1.0] — 2026-08-10
+
+Fabric support. The mod's behaviour on NeoForge is unchanged: every fix below is in code that has
+only ever run on Fabric, or in documentation.
+
+### Added
+
+- **Fabric build.** `echopins-fabric-1.1.0+mc1.21.1.jar`, requiring Fabric Loader 0.19.3+, Fabric
+  API and Simple Voice Chat for Fabric. It is built from the same sources as the NeoForge jar and
+  speaks the same protocol version.
+- The repository is now a two-loader monorepo: `common/` holds the 90 loader-agnostic source files,
+  `neoforge/` and `fabric/` hold entry points, config and the networking binding. `common` is
+  compiled by each loader project against its own remapped Minecraft; both use Mojang mappings,
+  which is what makes one source tree valid for each.
+- `ServerLimits.reload()`, so a loader that caches its configuration can re-read it from
+  `/echopins admin reload`. NeoForge reads its config live and takes the no-op default.
+
+### Fixed
+
+- **Fabric: changing dimension did not resynchronise pins.** Fabric does not fold dimension changes
+  into its respawn callback the way NeoForge does, so travelling through a portal left the previous
+  dimension's markers on screen until a delta sync happened to correct it. Now wired to
+  `AFTER_PLAYER_CHANGE_WORLD`.
+- **Fabric: `/echopins admin reload` did not reload anything.** The running server captures one
+  `ServerLimits` at start-up and holds it for its life, and the Fabric implementation replaced its
+  singleton rather than mutating it, so the reloaded values were written to an object nobody read.
+  The implementation is now a stable facade over a volatile snapshot.
+- **Fabric: markers were drawn a stage too early**, before translucent terrain rather than after,
+  so a pin seen through water or glass blended differently than on NeoForge.
+- Documentation claimed the play-nearest key was unbound. It has been `R` since 1.0.1.
+- Documentation claimed the protocol version is enforced on both loaders. Only NeoForge negotiates
+  it; Fabric has no equivalent, and a mismatch there surfaces as a decode error instead.
+
+### Changed
+
+- **Artifact names now carry the loader in front of the version**:
+  `echopins-neoforge-1.1.0+mc1.21.1.jar`, `echopins-fabric-1.1.0+mc1.21.1.jar`. Up to 1.0.1 the
+  NeoForge jar was `echopins-1.0.1+mc1.21.1-neoforge.jar`; a trailing loader suffix reads as
+  ambiguous once there are two.
+- Configuration on Fabric is `config/echopins-server.json` and `config/echopins-client.json`.
+  Same options, same defaults, same ranges — they come from one shared table in the source — but
+  Fabric has no config system of its own, so the file is JSON rather than TOML. Unlike NeoForge,
+  the Fabric files are read at start-up rather than live; see `docs/CONFIGURATION.md`.
+
 ## [1.0.1] — 2026-08-09
 
 The first build published to Modrinth and CurseForge. `1.0.0` was tagged but never released;

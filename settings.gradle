@@ -2,11 +2,15 @@ pluginManagement {
     repositories {
         mavenCentral()
         gradlePluginPortal()
-        maven {
-            name = 'NeoForged'
-            url = 'https://maven.neoforged.net/releases'
-        }
+        maven { name = 'NeoForged'; url = 'https://maven.neoforged.net/releases' }
+        maven { name = 'Fabric';    url = 'https://maven.fabricmc.net/' }
     }
 }
 
 rootProject.name = 'echopins'
+
+// `common` is not a Gradle subproject: it has no loader and therefore no Minecraft to compile
+// against on its own. Both loader projects add its sources directly, each compiling them against
+// its own remapped Minecraft. Both use Mojang mappings, so the same sources compile identically.
+include 'neoforge'
+include 'fabric'

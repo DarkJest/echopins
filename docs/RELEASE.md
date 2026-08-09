@@ -17,21 +17,30 @@ explains how the machinery works and why it is arranged this way.
 Two things are versioned separately from the mod and must be bumped when they change
 incompatibly:
 
-- `EchoPinsNetwork.PROTOCOL_VERSION` — NeoForge refuses a connection whose EchoPins protocol
-  version differs, turning a mismatched pair into a clear message instead of a decode failure.
+- `EchoPinsNetwork.PROTOCOL_VERSION` — NeoForge negotiates this at login and refuses a connection
+  whose EchoPins protocol version differs, turning a mismatched pair into a clear message instead
+  of a decode failure. **Fabric has no equivalent negotiation**, so on that loader a mismatch
+  surfaces later as a decode error. Treat a wire-shape change as requiring new payload identifiers,
+  not merely a version bump, if a clean rejection on Fabric matters.
 - `EchoPinsSavedData.DATA_VERSION` — bump **together with** a registered `DataMigration`. The
   registry rejects a gap in the chain at startup rather than when a user's world fails to load.
 
 ## Artifact naming
 
+One jar per loader, built from the same commit:
+
 ```
-echopins-<version>+mc<minecraft>-neoforge.jar
+echopins-neoforge-<version>+mc<minecraft>.jar
+echopins-fabric-<version>+mc<minecraft>.jar
 ```
 
-for example `echopins-1.0.0+mc1.21.1-neoforge.jar`.
+for example `echopins-neoforge-1.1.0+mc1.21.1.jar`.
 
-The build metadata lives in the archive version rather than the base name, so Gradle does not
-append the raw version a second time.
+The loader is part of the base name and the Minecraft version is build metadata on the archive
+version, so Gradle does not append the raw version a second time.
+
+> Releases up to and including 1.0.1 used `echopins-<version>+mc<minecraft>-neoforge.jar`. The
+> loader moved to the front in 1.1.0, when a second loader made a suffix ambiguous.
 
 ## Reproducibility
 

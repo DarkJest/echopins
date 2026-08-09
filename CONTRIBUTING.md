@@ -19,11 +19,18 @@ Needs JDK 21. The first build downloads and decompiles Minecraft, so give it a f
 
 | Task | What it does |
 |---|---|
-| `./gradlew build` | Compile, test, produce the jar |
-| `./gradlew test` | Unit tests only |
-| `./gradlew runClient` | Dev client with Simple Voice Chat on the classpath |
-| `./gradlew runServer` | Dev dedicated server |
-| `./gradlew runGameTestServer` | GameTest harness |
+| `./gradlew build` | Compile and test both loaders, produce both jars |
+| `./gradlew test` | Unit tests only (they run once per loader project) |
+| `./gradlew :neoforge:runClient` | Dev client with Simple Voice Chat on the classpath |
+| `./gradlew :neoforge:runServer` | Dev dedicated server |
+| `./gradlew :neoforge:runGameTestServer` | GameTest harness |
+| `./gradlew :fabric:runClient` | Dev client, **without** Simple Voice Chat — see below |
+
+Development on the voice integration has to happen on NeoForge. Loom refuses to process a mod jar
+built with a newer version of Loom than the one in use, and every Loom release that accepts the
+current Simple Voice Chat build requires Gradle 9, which ModDevGradle does not support. Rather than
+split the build across two Gradle versions, the Fabric dev runtime omits Simple Voice Chat. The
+integration code is shared, so exercising it on NeoForge exercises it for both.
 
 `runClient` and `runServer` pull the real Simple Voice Chat mod from the Modrinth Maven so the
 integration can actually be exercised.
@@ -32,7 +39,13 @@ integration can actually be exercised.
 
 These are enforced by review, and breaking one is the fastest way to get a PR sent back.
 
-1. **`dev.echopins.domain` imports nothing from Minecraft, NeoForge or Simple Voice Chat.** That
+0. **`common/` imports nothing from either loader.** It is compiled by both `neoforge` and
+   `fabric` against their own remapped Minecraft. If you need something a loader provides, put the
+   loader-specific part in that loader's project and reach it through an interface in `common` —
+   `ServerLimits`, `ClientSettings` and `EchoPinsNetwork.Transport` are the existing examples.
+   Anything else silently breaks one of the two builds.
+1. **`dev.echopins.domain` imports nothing from Minecraft, either loader, or Simple Voice Chat.**
+   That
    restriction is what makes the interesting logic unit-testable. If a domain class needs a
    Minecraft type, the type is wrong, not the rule.
 2. **Client code lives under `dev.echopins.client`** and is reached only through the

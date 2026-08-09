@@ -1,0 +1,52 @@
+plugins {
+    id 'fabric-loom' version '1.9.2'
+}
+
+base { archivesName = "${mod_id}-fabric" }
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    archiveVersion = "${mod_version}+mc${minecraft_version}"
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    // Mojang mappings on both loaders is what lets `common` compile unchanged for each.
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+
+    // Provided at runtime by the Simple Voice Chat mod. A plain Maven artifact, so Loom does not
+    // treat it as a mod and does not try to remap it.
+    compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
+
+    // Deliberately NOT a dev-runtime dependency. Loom refuses to process a mod jar built with a
+    // newer Loom than the one in use, and the Loom versions that accept the current Simple Voice
+    // Chat build require Gradle 9, which ModDevGradle does not support. Rather than split the
+    // build across two Gradle versions, the Fabric dev runtime goes without Simple Voice Chat:
+    // the jar still builds and the shared code is still covered by the NeoForge dev environment,
+    // where the integration can be exercised end to end. See docs/ARCHITECTURE.md.
+}
+
+loom {
+    runs {
+        client { client() }
+        server { server() }
+    }
+}
+
+processResources {
+    var replaceProperties = [
+            minecraft_version_range     : fabric_minecraft_version_range,
+            fabric_loader_version       : fabric_loader_version,
+            voicechat_api_version       : voicechat_api_version,
+            mod_id                      : mod_id,
+            mod_name                    : mod_name,
+            mod_license                 : mod_license,
+            mod_version                 : mod_version,
+            mod_authors                 : mod_authors,
+            mod_description             : mod_description,
+            java_version                : java_version,
+    ]
+    inputs.properties replaceProperties
+    filesMatching('fabric.mod.json') { expand replaceProperties }
+}

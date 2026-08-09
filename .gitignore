@@ -3,9 +3,14 @@
 build/
 !gradle/wrapper/gradle-wrapper.jar
 
-# Dev run directories produced by ModDevGradle
+# Dev run directories produced by the loader plugins
 run/
 runs/
+*/run/
+*/runs/
+logs/
+*/logs/
+*.log
 
 # Local research scratch (downloaded reference jars, build logs)
 .research/

@@ -1,0 +1,68 @@
+plugins {
+    id 'net.neoforged.moddev' version '2.0.143'
+}
+
+base { archivesName = "${mod_id}-neoforge" }
+
+tasks.withType(AbstractArchiveTask).configureEach {
+    archiveVersion = "${mod_version}+mc${minecraft_version}"
+}
+
+neoForge {
+    version = project.neo_version
+
+    runs {
+        configureEach {
+            systemProperty 'forge.logging.markers', ''
+            logLevel = org.slf4j.event.Level.INFO
+        }
+        client { client() }
+        server { server(); programArgument '--nogui' }
+        gameTestServer {
+            type = 'gameTestServer'
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+        }
+        data { data() }
+    }
+
+    mods {
+        "${mod_id}" { sourceSet sourceSets.main }
+    }
+}
+
+dependencies {
+    // Provided at runtime by the Simple Voice Chat mod, which ships the `voicechat_api` mod id.
+    compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
+    // Dev-runtime only, so the integration can actually be exercised.
+    runtimeOnly "maven.modrinth:simple-voice-chat:${voicechat_dev_runtime_neoforge}"
+}
+
+tasks.withType(ProcessResources).configureEach {
+    var replaceProperties = [
+            minecraft_version_range     : minecraft_version_range,
+            neo_version_range           : neo_version_range,
+            loader_version_range        : loader_version_range,
+            voicechat_api_version_range : voicechat_api_version_range,
+            mod_id                      : mod_id,
+            mod_name                    : mod_name,
+            mod_license                 : mod_license,
+            mod_version                 : mod_version,
+            mod_authors                 : mod_authors,
+            mod_description             : mod_description,
+    ]
+    inputs.properties replaceProperties
+    filesMatching(['META-INF/neoforge.mods.toml']) { expand replaceProperties }
+}
+
+jar {
+    manifest {
+        attributes([
+                'Specification-Title'   : mod_name,
+                'Specification-Vendor'  : mod_authors,
+                'Specification-Version' : '1',
+                'Implementation-Title'  : mod_name,
+                'Implementation-Version': mod_version,
+                'Implementation-Vendor' : mod_authors,
+        ])
+    }
+}
