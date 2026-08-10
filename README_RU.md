@@ -6,10 +6,11 @@
 
 **Оставь сообщение там, где это важно.**
 
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen)](https://www.minecraft.net/)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1%20%7C%201.21.1-brightgreen)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Loader-Fabric-DBD0B4)](https://fabricmc.net/)
+[![Forge](https://img.shields.io/badge/Loader-Forge-E04E14)](https://files.minecraftforge.net/)
 [![NeoForge](https://img.shields.io/badge/Loader-NeoForge-F1792B)](https://neoforged.net/)
-[![Java](https://img.shields.io/badge/Java-21-blue)](https://adoptium.net/)
+[![Java](https://img.shields.io/badge/Java-17%20%7C%2021-blue)](https://adoptium.net/)
 [![Требуется](https://img.shields.io/badge/Requires-Simple%20Voice%20Chat-9cf)](https://modrinth.com/plugin/simple-voice-chat)
 [![Лицензия](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -73,13 +74,15 @@ EchoPins — это **асинхронные голосовые сообщени
 
 ## Требования
 
-| | |
-|---|---|
-| Minecraft | 1.21.1 |
-| Загрузчик | NeoForge 21.1.0+ или Fabric Loader 0.19.3+ |
-| Java | 21 |
-| Обязательный мод | [Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat) для 1.21.1 (2.6.20+) |
-| Стороны | **Клиент и сервер** — оба мода нужны с обеих сторон |
+| Minecraft | Fabric | Forge | NeoForge | Java | Ветка релизов |
+|---|---:|---:|---:|---:|---|
+| **1.21.1** | ✅ | — | ✅ | 21 | [Стабильная v1.1.1](https://github.com/DarkJest/echopins/releases/tag/v1.1.1) / `main` |
+| **1.20.1** | ✅ | ✅ | ✅ | 17 | [Бета v1.2.0-beta.1](https://github.com/DarkJest/echopins/releases/tag/v1.2.0-beta.1) / [`1.20.1`](https://github.com/DarkJest/echopins/tree/1.20.1) |
+
+Обе линии продолжают поддерживаться. В этой ветке находится Minecraft 1.21.1, а отдельная ветка
+`1.20.1` собирает три файла для загрузчиков версии 1.20.1. Везде нужен соответствующий версии игры
+[Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat) на клиенте и сервере; для Fabric
+также требуется Fabric API.
 
 ## Установка
 

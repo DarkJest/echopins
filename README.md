@@ -6,10 +6,11 @@
 
 **Leave a message where it matters.**
 
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen)](https://www.minecraft.net/)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1%20%7C%201.21.1-brightgreen)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Loader-Fabric-DBD0B4)](https://fabricmc.net/)
+[![Forge](https://img.shields.io/badge/Loader-Forge-E04E14)](https://files.minecraftforge.net/)
 [![NeoForge](https://img.shields.io/badge/Loader-NeoForge-F1792B)](https://neoforged.net/)
-[![Java](https://img.shields.io/badge/Java-21-blue)](https://adoptium.net/)
+[![Java](https://img.shields.io/badge/Java-17%20%7C%2021-blue)](https://adoptium.net/)
 [![Requires](https://img.shields.io/badge/Requires-Simple%20Voice%20Chat-9cf)](https://modrinth.com/plugin/simple-voice-chat)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -71,13 +72,15 @@ Your friends see a small marker when they get close, and press one key to listen
 
 ## Requirements
 
-| | |
-|---|---|
-| Minecraft | 1.21.1 |
-| Loader | NeoForge 21.1.0+ or Fabric Loader 0.19.3+ |
-| Java | 21 |
-| Required mod | [Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat) for 1.21.1 (2.6.20+) |
-| Sides | **Client and server** — both need EchoPins and Simple Voice Chat |
+| Minecraft | Fabric | Forge | NeoForge | Java | Release line |
+|---|---:|---:|---:|---:|---|
+| **1.21.1** | ✅ | — | ✅ | 21 | [Stable v1.1.1](https://github.com/DarkJest/echopins/releases/tag/v1.1.1) / `main` |
+| **1.20.1** | ✅ | ✅ | ✅ | 17 | [Beta v1.2.0-beta.1](https://github.com/DarkJest/echopins/releases/tag/v1.2.0-beta.1) / [`1.20.1`](https://github.com/DarkJest/echopins/tree/1.20.1) |
+
+Both release lines remain supported. This branch contains Minecraft 1.21.1; the dedicated
+`1.20.1` branch builds the three 1.20.1 loader artifacts. Every installation requires matching
+versions of [Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat) on both client and
+server; Fabric also requires Fabric API.
 
 ## Installation
 
