@@ -7,7 +7,8 @@
 **Leave a message where it matters.**
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen)](https://www.minecraft.net/)
-[![Loader](https://img.shields.io/badge/Loader-NeoForge%2021.1-orange)](https://neoforged.net/)
+[![Fabric](https://img.shields.io/badge/Loader-Fabric-DBD0B4)](https://fabricmc.net/)
+[![NeoForge](https://img.shields.io/badge/Loader-NeoForge-F1792B)](https://neoforged.net/)
 [![Java](https://img.shields.io/badge/Java-21-blue)](https://adoptium.net/)
 [![Requires](https://img.shields.io/badge/Requires-Simple%20Voice%20Chat-9cf)](https://modrinth.com/plugin/simple-voice-chat)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
@@ -82,7 +83,7 @@ Your friends see a small marker when they get close, and press one key to listen
 
 ### Client
 
-1. Install NeoForge for Minecraft 1.21.1.
+1. Install NeoForge 21.1.x, or Fabric Loader plus Fabric API, for Minecraft 1.21.1.
 2. Drop **Simple Voice Chat** and **EchoPins** into `mods/`.
 3. Launch. Rebind the keys in *Options → Controls → EchoPins* if you like.
 

@@ -54,6 +54,8 @@ public final class EchoPinsSavedData extends SavedData {
 
     private final PinStore pins = new PinStore();
     private final ReadStateStore readState = new ReadStateStore();
+    /** Original data retained verbatim when it comes from a schema this build cannot write. */
+    private CompoundTag newerSchemaSnapshot;
 
     private EchoPinsSavedData() {
     }
@@ -93,6 +95,9 @@ public final class EchoPinsSavedData extends SavedData {
                             + "Pins that this build cannot read will be skipped and will be lost if the "
                             + "world is saved. Back up your world and update EchoPins.",
                     fileVersion, DATA_VERSION);
+            // This build may read a subset for the current session, but it must never downgrade the
+            // file on the next autosave and destroy fields it does not understand.
+            data.newerSchemaSnapshot = tag.copy();
         }
 
         int loaded = 0;
@@ -165,6 +170,11 @@ public final class EchoPinsSavedData extends SavedData {
 
     @Override
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+        if (newerSchemaSnapshot != null) {
+            LOGGER.error("Refusing to overwrite EchoPins data from a newer schema; session changes "
+                    + "will not be persisted until the mod is updated");
+            return newerSchemaSnapshot.copy();
+        }
         tag.putInt(KEY_DATA_VERSION, DATA_VERSION);
 
         ListTag pinList = new ListTag();

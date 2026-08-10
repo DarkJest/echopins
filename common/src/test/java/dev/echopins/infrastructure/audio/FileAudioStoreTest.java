@@ -1,7 +1,9 @@
 package dev.echopins.infrastructure.audio;
 
 import dev.echopins.domain.audio.AudioRef;
+import dev.echopins.domain.audio.AudioStorageFullException;
 import dev.echopins.domain.audio.VoiceRecording;
+import dev.echopins.infrastructure.audio.epv.EpvFormat;
 import dev.echopins.infrastructure.audio.epv.EpvFormatException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,10 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -162,6 +168,84 @@ class FileAudioStoreTest {
 
         assertEquals(0, ref.frameCount());
         assertTrue(store.load(ref.audioId()).orElseThrow().isEmpty());
+    }
+
+    @Test
+    @DisplayName("The total byte limit includes the incoming container")
+    void totalLimitIncludesIncomingRecording(@TempDir Path dir) throws IOException {
+        FileAudioStore store = new FileAudioStore(dir);
+        VoiceRecording audio = recording(10, (byte) 5);
+        long containerBytes = EpvFormat.containerSize(audio.frameCount(), audio.totalPayloadBytes());
+
+        store.store(audio, containerBytes * 2 - 1);
+
+        assertThrows(AudioStorageFullException.class,
+                () -> store.store(audio, containerBytes * 2 - 1));
+        assertEquals(containerBytes, store.totalBytes());
+        assertEquals(1, store.listAudioIds().size());
+    }
+
+    @Test
+    @DisplayName("A refused store leaves no file or temporary residue")
+    void rejectedStoreLeavesNoResidue(@TempDir Path dir) throws IOException {
+        FileAudioStore store = new FileAudioStore(dir);
+        VoiceRecording audio = recording(10, (byte) 7);
+        long containerBytes = EpvFormat.containerSize(audio.frameCount(), audio.totalPayloadBytes());
+
+        assertThrows(AudioStorageFullException.class,
+                () -> store.store(audio, containerBytes - 1));
+
+        assertEquals(0L, store.totalBytes());
+        assertTrue(store.listAudioIds().isEmpty());
+        try (Stream<Path> paths = Files.walk(dir)) {
+            assertTrue(paths.noneMatch(Files::isRegularFile),
+                    "a quota rejection must happen before creating a temp file");
+        }
+    }
+
+    @Test
+    @DisplayName("Deleting audio immediately releases its reserved capacity")
+    void deletionReleasesCapacity(@TempDir Path dir) throws IOException {
+        FileAudioStore store = new FileAudioStore(dir);
+        VoiceRecording audio = recording(10, (byte) 8);
+        long containerBytes = EpvFormat.containerSize(audio.frameCount(), audio.totalPayloadBytes());
+
+        AudioRef first = store.store(audio, containerBytes);
+        assertTrue(store.delete(first.audioId()));
+        AudioRef second = store.store(audio, containerBytes);
+
+        assertEquals(containerBytes, store.totalBytes());
+        assertEquals(Set.of(second.audioId()), store.listAudioIds());
+    }
+
+    @Test
+    @DisplayName("Concurrent stores cannot both claim the same remaining capacity")
+    void concurrentStoresRespectOneSharedLimit(@TempDir Path dir) throws Exception {
+        FileAudioStore store = new FileAudioStore(dir);
+        VoiceRecording audio = recording(20, (byte) 6);
+        long containerBytes = EpvFormat.containerSize(audio.frameCount(), audio.totalPayloadBytes());
+        CountDownLatch start = new CountDownLatch(1);
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        try {
+            java.util.concurrent.Callable<Boolean> attempt = () -> {
+                start.await();
+                try {
+                    store.store(audio, containerBytes);
+                    return true;
+                } catch (AudioStorageFullException expected) {
+                    return false;
+                }
+            };
+            Future<Boolean> first = pool.submit(attempt);
+            Future<Boolean> second = pool.submit(attempt);
+            start.countDown();
+
+            assertTrue(first.get() ^ second.get(), "exactly one store must reserve the capacity");
+            assertEquals(containerBytes, store.totalBytes());
+            assertEquals(1, store.listAudioIds().size());
+        } finally {
+            pool.shutdownNow();
+        }
     }
 
     private static Path findStoredFile(Path root) throws IOException {

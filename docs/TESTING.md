@@ -86,7 +86,7 @@ Expected for the last two: a clear protocol-mismatch / missing-dependency screen
 | Out of interaction range | Refused | ☐ |
 | Private pin, recipient | Plays | ☐ |
 | Private pin, non-recipient | Marker never sent; direct request refused | ☐ |
-| Private pin, operator | Plays | ☐ |
+| Private pin, operator | Refused; operators may delete but cannot listen | ☐ |
 | Deleted mid-playback | Playback stops | ☐ |
 | Expired pin | Gone; playback refused | ☐ |
 | Corrupted audio file | "Recording is damaged", server stays up | ☐ |

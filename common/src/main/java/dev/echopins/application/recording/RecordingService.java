@@ -5,6 +5,7 @@ import dev.echopins.application.pin.AnchorResolver;
 import dev.echopins.application.voice.VoiceBackend;
 import dev.echopins.domain.anchor.WorldAnchor;
 import dev.echopins.domain.audio.AudioRef;
+import dev.echopins.domain.audio.AudioStorageFullException;
 import dev.echopins.domain.audio.AudioStore;
 import dev.echopins.domain.audio.VoiceRecording;
 import dev.echopins.domain.error.EchoPinError;
@@ -63,7 +64,11 @@ public final class RecordingService implements VoiceBackend.MicrophoneCapture {
 
     private final Map<UUID, RecordingSession> sessions = new ConcurrentHashMap<>();
     private final Map<UUID, PendingRecording> pending = new ConcurrentHashMap<>();
+    /** Players whose finished recording is currently being persisted on the IO pool. */
+    private final Map<UUID, Long> saving = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastStatePushMillis = new ConcurrentHashMap<>();
+    private final java.util.concurrent.atomic.AtomicLong saveSequence =
+            new java.util.concurrent.atomic.AtomicLong();
 
     public RecordingService(ServerLimits limits, AudioStore audioStore,
                             AnchorResolver anchorResolver, java.util.function.LongSupplier clock) {
@@ -75,6 +80,13 @@ public final class RecordingService implements VoiceBackend.MicrophoneCapture {
 
     public boolean isRecording(UUID player) {
         return sessions.containsKey(player);
+    }
+
+    /** Whether the player owns any recording state that must not survive a world transition. */
+    public boolean hasRecordingState(UUID player) {
+        return sessions.containsKey(player)
+                || saving.containsKey(player)
+                || pending.containsKey(player);
     }
 
     public Optional<PendingRecording> pendingFor(UUID player) {
@@ -97,9 +109,9 @@ public final class RecordingService implements VoiceBackend.MicrophoneCapture {
     public void begin(ServerPlayer player, Optional<ServerboundPayloads.BlockTarget> blockTarget,
                       VoiceBackend voice) {
         UUID uuid = player.getUUID();
-        if (sessions.containsKey(uuid)) {
+        if (sessions.containsKey(uuid) || saving.containsKey(uuid)) {
             throw new EchoPinException(EchoPinError.ALREADY_RECORDING,
-                    "Player " + uuid + " already has an open recording session");
+                    "Player " + uuid + " already has an open or saving recording session");
         }
         if (!voice.isAvailable() || !voice.isPlayerConnected(uuid)) {
             throw new EchoPinException(EchoPinError.VOICE_CHAT_NOT_CONNECTED,
@@ -148,12 +160,6 @@ public final class RecordingService implements VoiceBackend.MicrophoneCapture {
                     "Recording was " + recording.durationMillis() + "ms, minimum is "
                             + limits.minRecordingMillis() + "ms");
         }
-        if (audioStore.totalBytes() >= limits.maxTotalAudioStorageBytes()) {
-            sendIdle(player);
-            throw new EchoPinException(EchoPinError.STORAGE_FULL,
-                    "Audio storage is at capacity (" + audioStore.totalBytes() + " bytes)");
-        }
-
         WorldAnchor anchor = session.anchor();
         EchoPinsExecutors executors = EchoPinsExecutors.current();
         MinecraftServer server = player.getServer();
@@ -162,20 +168,38 @@ public final class RecordingService implements VoiceBackend.MicrophoneCapture {
             throw new EchoPinException(EchoPinError.INTERNAL_ERROR, "Server is shutting down");
         }
 
+        long saveToken = saveSequence.incrementAndGet();
+        saving.put(uuid, saveToken);
         boolean accepted = executors.submitIo(() -> {
             AudioRef ref;
             try {
-                ref = audioStore.store(recording);
+                ref = audioStore.store(recording, limits.maxTotalAudioStorageBytes());
+            } catch (AudioStorageFullException e) {
+                LOGGER.debug("Could not store recording for {}: {}", uuid, e.getMessage());
+                server.execute(() -> {
+                    if (saving.remove(uuid, saveToken)) {
+                        sendIdle(player);
+                        sendError(player, EchoPinError.STORAGE_FULL);
+                    }
+                });
+                return;
             } catch (IOException | RuntimeException e) {
                 LOGGER.error("Could not store recording for {}", uuid, e);
                 server.execute(() -> {
-                    sendIdle(player);
-                    sendError(player, EchoPinError.INTERNAL_ERROR);
+                    if (saving.remove(uuid, saveToken)) {
+                        sendIdle(player);
+                        sendError(player, EchoPinError.INTERNAL_ERROR);
+                    }
                 });
                 return;
             }
             // Back to the server thread before touching any shared state or sending packets.
             server.execute(() -> {
+                // Cancel, disconnect, shutdown, or a newer lifecycle invalidates this completion.
+                if (!saving.remove(uuid, saveToken)) {
+                    audioStore.delete(ref.audioId());
+                    return;
+                }
                 // The player may have left while the audio was being written. Storing a pending
                 // recording for an absent player would leak the file until the timeout swept it,
                 // and the packet below would go to a dead connection.
@@ -184,7 +208,11 @@ public final class RecordingService implements VoiceBackend.MicrophoneCapture {
                     audioStore.delete(ref.audioId());
                     return;
                 }
-                pending.put(uuid, new PendingRecording(anchor, ref, clock.getAsLong()));
+                PendingRecording replaced = pending.put(
+                        uuid, new PendingRecording(anchor, ref, clock.getAsLong()));
+                if (replaced != null) {
+                    audioStore.delete(replaced.audio().audioId());
+                }
                 EchoPinsNetwork.sendTo(player, new ClientboundPayloads.RecordingState(
                         RecordingPhase.AWAITING_CONFIRMATION,
                         recording.durationMillis(),
@@ -194,6 +222,7 @@ public final class RecordingService implements VoiceBackend.MicrophoneCapture {
         });
 
         if (!accepted) {
+            saving.remove(uuid, saveToken);
             sendIdle(player);
             throw new EchoPinException(EchoPinError.INTERNAL_ERROR, "IO queue is saturated");
         }
@@ -203,6 +232,7 @@ public final class RecordingService implements VoiceBackend.MicrophoneCapture {
     public void cancel(ServerPlayer player) {
         UUID uuid = player.getUUID();
         RecordingSession session = sessions.remove(uuid);
+        saving.remove(uuid);
         lastStatePushMillis.remove(uuid);
         if (session != null) {
             session.discard();
@@ -261,6 +291,7 @@ public final class RecordingService implements VoiceBackend.MicrophoneCapture {
     /** Ends everything for a player who has left, died, or changed dimension. */
     public void endFor(UUID player) {
         RecordingSession session = sessions.remove(player);
+        saving.remove(player);
         lastStatePushMillis.remove(player);
         if (session != null) {
             session.discard();
@@ -358,6 +389,7 @@ public final class RecordingService implements VoiceBackend.MicrophoneCapture {
             session.discard();
         }
         sessions.clear();
+        saving.clear();
         lastStatePushMillis.clear();
         for (PendingRecording abandoned : pending.values()) {
             audioStore.delete(abandoned.audio().audioId());

@@ -12,38 +12,13 @@
     </style>
   </defs>
 
-  <!-- Abstract blocky backdrop: suggests a mine wall without pretending to be a render -->
-  <rect width="1280" height="720" fill="#2B2622"/>
-  <g opacity="0.55">
-    <rect x="0" y="0" width="1280" height="120" fill="#332D28"/>
-    <rect x="0" y="120" width="1280" height="120" fill="#2E2823"/>
-    <rect x="0" y="240" width="1280" height="120" fill="#37302A"/>
-    <rect x="0" y="360" width="1280" height="120" fill="#2C2621"/>
-    <rect x="0" y="480" width="1280" height="120" fill="#332C26"/>
-    <rect x="0" y="600" width="1280" height="120" fill="#282320"/>
-  </g>
-  <g opacity="0.30" fill="#1E1A17">
-    <rect x="120" y="60" width="120" height="120"/>
-    <rect x="480" y="180" width="120" height="120"/>
-    <rect x="900" y="300" width="120" height="120"/>
-    <rect x="240" y="420" width="120" height="120"/>
-    <rect x="1020" y="60" width="120" height="120"/>
-    <rect x="660" y="540" width="120" height="120"/>
-  </g>
-  <!-- floor -->
-  <rect x="0" y="600" width="1280" height="120" fill="#241F1B"/>
-
-  <!-- Chest -->
-  <g>
-    <rect x="520" y="452" width="180" height="150" fill="#7A5326"/>
-    <rect x="520" y="452" width="180" height="52" fill="#8C6130"/>
-    <rect x="520" y="500" width="180" height="10" fill="#4A3117"/>
-    <rect x="596" y="486" width="28" height="34" rx="4" fill="#C9C2B4"/>
-    <rect x="520" y="452" width="180" height="150" fill="none" stroke="#3E2A13" stroke-width="6"/>
-  </g>
+  <!-- AI-assisted promotional backdrop. The interface overlay below is deterministic SVG. -->
+  <image href="workshop-backdrop.png" x="0" y="0" width="1280" height="720"
+         preserveAspectRatio="xMidYMid slice"/>
+  <rect width="1280" height="720" fill="#071014" opacity="0.12"/>
 
   <!-- EchoPin marker floating above the chest -->
-  <g transform="translate(610 300) scale(0.19) translate(-256 -256)">
+  <g transform="translate(640 300) scale(0.19) translate(-256 -256)">
     <g fill="#16202B">
       <circle cx="256" cy="200" r="150"/>
       <path d="M 152 292 L 360 292 L 256 452 Z"/>
@@ -67,20 +42,16 @@
   </g>
 
   <!-- Focused pin label, matching FocusedPinHud -->
-  <g transform="translate(492 392)">
-    <rect x="0" y="0" width="296" height="98" fill="#101418" opacity="0.71"/>
+  <g transform="translate(424 392)">
+    <rect x="0" y="0" width="432" height="98" fill="#101418" opacity="0.82"/>
+    <rect x="0" y="0" width="432" height="98" fill="none" stroke="#2FB6C4" stroke-width="1" opacity="0.55"/>
     <text class="ui title" x="12" y="24">Alex</text>
     <text class="ui amber" x="62" y="24">• new</text>
     <text class="ui muted" x="12" y="47">12s ago  ·  0:08</text>
-    <text class="ui caption" x="12" y="70">Don't take the iron yet, it's for the reactor</text>
+    <text class="ui caption" x="12" y="70">Don't take the iron yet — reactor stock</text>
     <text class="ui accent" x="12" y="91">R to play  ·  N for inbox</text>
   </g>
 
-  <!-- Hotbar suggestion, so the framing reads as in-game -->
-  <g opacity="0.9">
-    <rect x="458" y="660" width="364" height="40" rx="4" fill="#111111" opacity="0.6"/>
-    <rect x="460" y="662" width="36" height="36" fill="#2A2A2A" opacity="0.7"/>
-  </g>
-
-  <text class="ui tag" x="24" y="700">UI MOCKUP — NOT A GAMEPLAY SCREENSHOT</text>
+  <rect x="16" y="674" width="490" height="34" rx="4" fill="#071014" opacity="0.82"/>
+  <text class="ui tag" x="28" y="698">UI MOCKUP — AI-ASSISTED BACKDROP</text>
 </svg>

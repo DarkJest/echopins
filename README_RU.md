@@ -7,7 +7,8 @@
 **Оставь сообщение там, где это важно.**
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen)](https://www.minecraft.net/)
-[![Загрузчик](https://img.shields.io/badge/Loader-NeoForge%2021.1-orange)](https://neoforged.net/)
+[![Fabric](https://img.shields.io/badge/Loader-Fabric-DBD0B4)](https://fabricmc.net/)
+[![NeoForge](https://img.shields.io/badge/Loader-NeoForge-F1792B)](https://neoforged.net/)
 [![Java](https://img.shields.io/badge/Java-21-blue)](https://adoptium.net/)
 [![Требуется](https://img.shields.io/badge/Requires-Simple%20Voice%20Chat-9cf)](https://modrinth.com/plugin/simple-voice-chat)
 [![Лицензия](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
@@ -84,7 +85,7 @@ EchoPins — это **асинхронные голосовые сообщени
 
 ### Клиент
 
-1. Установите NeoForge для Minecraft 1.21.1.
+1. Установите NeoForge 21.1.x либо Fabric Loader и Fabric API для Minecraft 1.21.1.
 2. Положите **Simple Voice Chat** и **EchoPins** в папку `mods/`.
 3. Запустите игру. Клавиши можно переназначить в *Настройки → Управление → EchoPins*.
 

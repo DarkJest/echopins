@@ -1,6 +1,7 @@
 package dev.echopins.infrastructure.audio;
 
 import dev.echopins.domain.audio.AudioRef;
+import dev.echopins.domain.audio.AudioStorageFullException;
 import dev.echopins.domain.audio.AudioStore;
 import dev.echopins.domain.audio.VoiceRecording;
 import dev.echopins.infrastructure.audio.epv.EpvFormat;
@@ -46,6 +47,7 @@ public final class FileAudioStore implements AudioStore {
 
     private final Path root;
     private final AtomicLong totalBytes = new AtomicLong();
+    private final Object mutationLock = new Object();
 
     public FileAudioStore(Path root) throws IOException {
         this.root = root.toAbsolutePath().normalize();
@@ -56,31 +58,42 @@ public final class FileAudioStore implements AudioStore {
     }
 
     @Override
-    public AudioRef store(VoiceRecording recording) throws IOException {
+    public AudioRef store(VoiceRecording recording, long maxTotalBytes) throws IOException {
         byte[] encoded = EpvWriter.toBytes(recording);
-        UUID audioId = UUID.randomUUID();
-        Path target = pathFor(audioId);
-        Files.createDirectories(target.getParent());
-
-        Path temp = target.resolveSibling(target.getFileName() + TEMP_SUFFIX);
-        try {
-            // Force to disk before publishing, so a crash between write and move can only leave
-            // a stale temp file behind - never a half-written file under the real name.
-            try (FileChannel channel = FileChannel.open(temp,
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.TRUNCATE_EXISTING,
-                    StandardOpenOption.WRITE)) {
-                channel.write(java.nio.ByteBuffer.wrap(encoded));
-                channel.force(true);
+        synchronized (mutationLock) {
+            long current = totalBytes.get();
+            long limit = Math.max(0L, maxTotalBytes);
+            if (encoded.length > limit || current > limit - encoded.length) {
+                throw new AudioStorageFullException(current, encoded.length, limit);
             }
-            moveIntoPlace(temp, target);
-        } catch (IOException e) {
-            deleteQuietly(temp);
-            throw e;
-        }
 
-        totalBytes.addAndGet(encoded.length);
-        return new AudioRef(audioId, encoded.length, recording.frameCount());
+            UUID audioId = UUID.randomUUID();
+            Path target = pathFor(audioId);
+            Files.createDirectories(target.getParent());
+
+            Path temp = target.resolveSibling(target.getFileName() + TEMP_SUFFIX);
+            try {
+                // Force to disk before publishing, so a crash between write and move can only leave
+                // a stale temp file behind - never a half-written file under the real name.
+                try (FileChannel channel = FileChannel.open(temp,
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING,
+                        StandardOpenOption.WRITE)) {
+                    java.nio.ByteBuffer buffer = java.nio.ByteBuffer.wrap(encoded);
+                    while (buffer.hasRemaining()) {
+                        channel.write(buffer);
+                    }
+                    channel.force(true);
+                }
+                moveIntoPlace(temp, target);
+            } catch (IOException e) {
+                deleteQuietly(temp);
+                throw e;
+            }
+
+            totalBytes.addAndGet(encoded.length);
+            return new AudioRef(audioId, encoded.length, recording.frameCount());
+        }
     }
 
     @Override
@@ -107,17 +120,19 @@ public final class FileAudioStore implements AudioStore {
     @Override
     public boolean delete(UUID audioId) {
         Path path = pathFor(audioId);
-        try {
-            long size = Files.exists(path) ? Files.size(path) : 0L;
-            boolean deleted = Files.deleteIfExists(path);
-            if (deleted) {
-                totalBytes.addAndGet(-size);
-                pruneEmptyShard(path.getParent());
+        synchronized (mutationLock) {
+            try {
+                long size = Files.exists(path) ? Files.size(path) : 0L;
+                boolean deleted = Files.deleteIfExists(path);
+                if (deleted) {
+                    totalBytes.addAndGet(-size);
+                    pruneEmptyShard(path.getParent());
+                }
+                return deleted;
+            } catch (IOException e) {
+                LOGGER.warn("Could not delete audio {}", audioId, e);
+                return false;
             }
-            return deleted;
-        } catch (IOException e) {
-            LOGGER.warn("Could not delete audio {}", audioId, e);
-            return false;
         }
     }
 
@@ -138,9 +153,11 @@ public final class FileAudioStore implements AudioStore {
 
     /** Recomputes the byte total from disk. Used at startup and after an admin cleanup. */
     public long recomputeTotalBytes() throws IOException {
-        long total = computeTotalBytes();
-        totalBytes.set(total);
-        return total;
+        synchronized (mutationLock) {
+            long total = computeTotalBytes();
+            totalBytes.set(total);
+            return total;
+        }
     }
 
     private long computeTotalBytes() throws IOException {

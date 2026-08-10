@@ -3,8 +3,9 @@
 ## Why this file exists
 
 The images in `promo/` are **UI mockups**, not gameplay screenshots. They were built by rendering
-the mod's real interface geometry, colours and strings as vector art over an abstract backdrop.
-Every panel and string matches what the mod draws; the world behind them does not.
+the mod's real interface geometry, colours and strings as vector art. Some use a clearly disclosed
+AI-assisted voxel backdrop and one retains the original abstract vector backdrop. Every panel and
+string matches what the mod draws; the world behind them does not.
 
 They carry a visible `UI MOCKUP` tag and must never be presented as screenshots.
 

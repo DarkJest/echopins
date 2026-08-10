@@ -57,20 +57,22 @@ jobs:
             exit 1
           fi
 
-      - name: Identify the artifact and compute its checksum
-        id: artifact
+      - name: Identify both artifacts and compute checksums
+        id: artifacts
         run: |
-          JAR=$(find build/libs -name '*.jar' ! -name '*-sources.jar' | head -n 1)
-          if [ -z "$JAR" ]; then
-            echo "::error::No jar produced"
-            exit 1
-          fi
-          SHA=$(sha256sum "$JAR" | cut -d' ' -f1)
-          echo "jar=$JAR" >> "$GITHUB_OUTPUT"
-          echo "name=$(basename "$JAR")" >> "$GITHUB_OUTPUT"
-          echo "sha256=$SHA" >> "$GITHUB_OUTPUT"
-          sha256sum "$JAR" > "$JAR.sha256"
-          echo "$(basename "$JAR")  sha256  $SHA"
+          for LOADER in fabric neoforge; do
+            JAR=$(find "$LOADER/build/libs" -maxdepth 1 -name '*.jar' ! -name '*-sources.jar' | head -n 1)
+            if [ -z "$JAR" ]; then
+              echo "::error::No $LOADER jar produced"
+              exit 1
+            fi
+            SHA=$(sha256sum "$JAR" | cut -d' ' -f1)
+            echo "${LOADER}_jar=$JAR" >> "$GITHUB_OUTPUT"
+            echo "${LOADER}_name=$(basename "$JAR")" >> "$GITHUB_OUTPUT"
+            echo "${LOADER}_sha256=$SHA" >> "$GITHUB_OUTPUT"
+            sha256sum "$JAR" > "$JAR.sha256"
+            echo "$(basename "$JAR")  sha256  $SHA"
+          done
 
       - name: Assemble release notes
         id: notes
@@ -87,8 +89,11 @@ jobs:
             echo "## Checksums"
             echo ""
             echo '```'
-            echo "${{ steps.artifact.outputs.name }}"
-            echo "SHA-256: ${{ steps.artifact.outputs.sha256 }}"
+            echo "${{ steps.artifacts.outputs.fabric_name }}"
+            echo "SHA-256: ${{ steps.artifacts.outputs.fabric_sha256 }}"
+            echo ""
+            echo "${{ steps.artifacts.outputs.neoforge_name }}"
+            echo "SHA-256: ${{ steps.artifacts.outputs.neoforge_sha256 }}"
             echo '```'
           } >> "$NOTES"
           echo "path=$NOTES" >> "$GITHUB_OUTPUT"
@@ -102,8 +107,10 @@ jobs:
           draft: false
           prerelease: ${{ contains(github.event.inputs.tag || github.ref_name, '-') }}
           files: |
-            ${{ steps.artifact.outputs.jar }}
-            ${{ steps.artifact.outputs.jar }}.sha256
+            ${{ steps.artifacts.outputs.fabric_jar }}
+            ${{ steps.artifacts.outputs.fabric_jar }}.sha256
+            ${{ steps.artifacts.outputs.neoforge_jar }}
+            ${{ steps.artifacts.outputs.neoforge_jar }}.sha256
           fail_on_unmatched_files: true
 
   # Publishing to the mod sites is deliberately a separate job that is allowed to fail. The
@@ -150,10 +157,12 @@ jobs:
         if: steps.creds.outputs.skip == 'false'
         run: ./gradlew build
 
-      - name: Download the release jar name
+      - name: Identify release jars
         if: steps.creds.outputs.skip == 'false'
-        id: jar
-        run: echo "path=$(find build/libs -name '*.jar' ! -name '*-sources.jar' | head -n 1)" >> "$GITHUB_OUTPUT"
+        id: jars
+        run: |
+          echo "fabric=$(find fabric/build/libs -maxdepth 1 -name '*.jar' ! -name '*-sources.jar' | head -n 1)" >> "$GITHUB_OUTPUT"
+          echo "neoforge=$(find neoforge/build/libs -maxdepth 1 -name '*.jar' ! -name '*-sources.jar' | head -n 1)" >> "$GITHUB_OUTPUT"
 
       - name: Publish
         if: steps.creds.outputs.skip == 'false'
@@ -163,12 +172,16 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           curseforge-id: ${{ secrets.CURSEFORGE_PROJECT_ID }}
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          files: ${{ steps.jar.outputs.path }}
+          files: |
+            ${{ steps.jars.outputs.fabric }}
+            ${{ steps.jars.outputs.neoforge }}
           name: EchoPins ${{ github.event.inputs.tag || github.ref_name }}
           version: ${{ github.event.inputs.tag || github.ref_name }}
           version-type: release
           changelog-file: release/modrinth-changelog.md
-          loaders: neoforge
+          loaders: |
+            fabric
+            neoforge
           game-versions: 1.21.1
           java: 21
           dependencies: |

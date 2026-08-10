@@ -15,14 +15,9 @@
     </style>
   </defs>
 
-  <!-- Dimmed world behind the screen -->
-  <rect width="1280" height="720" fill="#2B2622"/>
-  <g opacity="0.5">
-    <rect x="0" y="0" width="1280" height="180" fill="#332D28"/>
-    <rect x="0" y="180" width="1280" height="180" fill="#2E2823"/>
-    <rect x="0" y="360" width="1280" height="180" fill="#37302A"/>
-    <rect x="0" y="540" width="1280" height="180" fill="#282320"/>
-  </g>
+  <!-- Dimmed AI-assisted promotional world behind the deterministic UI panel. -->
+  <image href="workshop-backdrop.png" x="0" y="0" width="1280" height="720"
+         preserveAspectRatio="xMidYMid slice"/>
   <rect width="1280" height="720" fill="#000000" opacity="0.55"/>
 
   <!-- Panel -->
@@ -46,7 +41,7 @@
     <g transform="translate(0 118)">
       <g transform="translate(0 0)">
         <text class="ui rowUnread" x="20" y="24">Alex</text>
-        <text class="ui meta" x="216" y="24">12s ago   0:08   118, 41, -304</text>
+        <text class="ui meta" x="170" y="24">12s ago · 0:08 · 118, 41, -304</text>
         <rect x="404" y="6" width="84" height="26" fill="#1D262C"/>
         <text class="ui btn" x="446" y="25" text-anchor="middle">Play</text>
         <rect x="496" y="6" width="88" height="26" fill="#151D22"/>
@@ -55,7 +50,7 @@
       <g transform="translate(0 44)">
         <text class="ui row" x="20" y="24">Mira</text>
         <text class="ui grey" x="76" y="24">[private]</text>
-        <text class="ui meta" x="216" y="24">4m ago   0:11   96, 63, -288</text>
+        <text class="ui meta" x="170" y="24">4m ago · 0:11 · 96, 63, -288</text>
         <rect x="404" y="6" width="84" height="26" fill="#1D262C"/>
         <text class="ui btn" x="446" y="25" text-anchor="middle">Play</text>
         <rect x="496" y="6" width="88" height="26" fill="#151D22"/>
@@ -63,7 +58,7 @@
       </g>
       <g transform="translate(0 88)">
         <text class="ui row" x="20" y="24">You</text>
-        <text class="ui meta" x="216" y="24">1h ago   0:06   102, 70, -260</text>
+        <text class="ui meta" x="170" y="24">1h ago · 0:06 · 102, 70, -260</text>
         <rect x="404" y="6" width="84" height="26" fill="#1D262C"/>
         <text class="ui btn" x="446" y="25" text-anchor="middle">Play</text>
         <rect x="496" y="6" width="88" height="26" fill="#1D262C"/>
@@ -71,7 +66,7 @@
       </g>
       <g transform="translate(0 132)">
         <text class="ui row" x="20" y="24">Jonas</text>
-        <text class="ui meta" x="216" y="24">3h ago   0:14   -12, 12, 402</text>
+        <text class="ui meta" x="170" y="24">3h ago · 0:14 · -12, 12, 402</text>
         <rect x="404" y="6" width="84" height="26" fill="#1D262C"/>
         <text class="ui btn" x="446" y="25" text-anchor="middle">Play</text>
         <rect x="496" y="6" width="88" height="26" fill="#151D22"/>
@@ -79,7 +74,7 @@
       </g>
       <g transform="translate(0 176)">
         <text class="ui row" x="20" y="24">Alex</text>
-        <text class="ui meta" x="216" y="24">2d ago   0:09   240, 32, -190</text>
+        <text class="ui meta" x="170" y="24">2d ago · 0:09 · 240, 32, -190</text>
         <rect x="404" y="6" width="84" height="26" fill="#1D262C"/>
         <text class="ui btn" x="446" y="25" text-anchor="middle">Play</text>
         <rect x="496" y="6" width="88" height="26" fill="#151D22"/>
@@ -99,5 +94,6 @@
     </g>
   </g>
 
-  <text class="ui tag" x="24" y="700">UI MOCKUP — NOT A GAMEPLAY SCREENSHOT</text>
+  <rect x="16" y="674" width="490" height="34" rx="4" fill="#071014" opacity="0.82"/>
+  <text class="ui tag" x="28" y="698">UI MOCKUP — AI-ASSISTED BACKDROP</text>
 </svg>

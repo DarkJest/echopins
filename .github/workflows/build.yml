@@ -53,15 +53,19 @@ jobs:
         with:
           name: test-results
           path: |
-            build/test-results/test/**/*.xml
-            build/reports/tests/test/**
+            fabric/build/test-results/test/**/*.xml
+            fabric/build/reports/tests/test/**
+            neoforge/build/test-results/test/**/*.xml
+            neoforge/build/reports/tests/test/**
           retention-days: 14
 
       - name: Upload jar
         uses: actions/upload-artifact@v4
         with:
           name: echopins-jar
-          path: build/libs/*.jar
+          path: |
+            fabric/build/libs/*.jar
+            neoforge/build/libs/*.jar
           if-no-files-found: error
           retention-days: 30
 

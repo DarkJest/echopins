@@ -29,8 +29,10 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Plays stored recordings back into the world.
@@ -66,7 +68,7 @@ public final class PlaybackService {
      * a player could hold the play key and queue an unbounded number of playbacks: every request
      * saw zero active and passed the limit.
      */
-    private final Map<UUID, Integer> starting = new ConcurrentHashMap<>();
+    private final Map<UUID, Set<UUID>> starting = new ConcurrentHashMap<>();
 
     private final CooldownRateLimiter<UUID> cooldown;
 
@@ -140,7 +142,8 @@ public final class PlaybackService {
         }
 
         // Claim the slot before going off-thread, so concurrent requests see it.
-        reserve(listener);
+        UUID requestId = UUID.randomUUID();
+        reserve(listener, requestId);
 
         // Decoding happens off the server thread; only the start of playback comes back to it.
         boolean accepted = executors.submitIo(() -> {
@@ -149,51 +152,72 @@ public final class PlaybackService {
                 loaded = audioStore.load(pin.audio().audioId());
             } catch (EpvFormatException e) {
                 LOGGER.warn("Audio for pin {} is damaged: {}", pinId, e.getMessage());
-                server.execute(() -> {
-                    release(listener);
-                    sendError(player, EchoPinError.AUDIO_DAMAGED);
-                });
+                server.execute(() -> failStarting(
+                        server, listener, requestId, EchoPinError.AUDIO_DAMAGED));
                 return;
             } catch (IOException | RuntimeException e) {
                 LOGGER.error("Could not read audio for pin {}", pinId, e);
-                server.execute(() -> {
-                    release(listener);
-                    sendError(player, EchoPinError.INTERNAL_ERROR);
-                });
+                server.execute(() -> failStarting(
+                        server, listener, requestId, EchoPinError.INTERNAL_ERROR));
                 return;
             }
 
             if (loaded.isEmpty() || loaded.get().isEmpty()) {
                 LOGGER.warn("Pin {} references audio {} that is missing", pinId, pin.audio().audioId());
-                server.execute(() -> {
-                    release(listener);
-                    sendError(player, EchoPinError.AUDIO_DAMAGED);
-                });
+                server.execute(() -> failStarting(
+                        server, listener, requestId, EchoPinError.AUDIO_DAMAGED));
                 return;
             }
 
             VoiceRecording recording = loaded.get();
-            server.execute(() -> startPlayback(player, pin, level, recording, operator));
+            server.execute(() -> startPlayback(
+                    server, listener, pinId, recording, operator, requestId));
         });
 
         if (!accepted) {
-            release(listener);
+            release(listener, requestId);
             throw new EchoPinException(EchoPinError.INTERNAL_ERROR, "IO queue is saturated");
         }
     }
 
-    private void startPlayback(ServerPlayer player, EchoPin pin, ServerLevel level,
-                               VoiceRecording recording, boolean operator) {
-        UUID reservationOwner = player.getUUID();
-        // The pin may have been deleted while its audio was being read.
-        if (pins.find(pin.id()).isEmpty()) {
-            release(reservationOwner);
+    private void startPlayback(MinecraftServer server, UUID listener, PinId pinId,
+                               VoiceRecording recording, boolean operator, UUID requestId) {
+        // Disconnect, shutdown, or cancellation removes the exact request id. A later reconnect
+        // therefore cannot accidentally revive an IO completion from the previous connection.
+        if (!release(listener, requestId)) {
+            return;
+        }
+        ServerPlayer player = server.getPlayerList().getPlayer(listener);
+        if (player == null) {
+            return;
+        }
+
+        // Everything that may have changed while the file was loading is checked again here.
+        EchoPin pin = pins.find(pinId).orElse(null);
+        if (pin == null) {
+            sendError(player, EchoPinError.PIN_NOT_FOUND);
+            return;
+        }
+        if (!accessPolicy.canPlay(pin, listener, operator)) {
+            sendError(player, EchoPinError.NO_ACCESS);
+            return;
+        }
+        if (!anchorResolver.isWithinInteractionRange(player, pin.anchor())) {
+            sendError(player, EchoPinError.TOO_FAR_AWAY);
+            return;
+        }
+        if (!voice.isAvailable() || !voice.isPlayerConnected(listener)) {
+            sendError(player, EchoPinError.VOICE_CHAT_NOT_CONNECTED);
+            return;
+        }
+        ServerLevel level = levelFor(server, pin);
+        if (level == null) {
             sendError(player, EchoPinError.PIN_NOT_FOUND);
             return;
         }
 
         UUID channelId = UUID.randomUUID();
-        UUID listener = player.getUUID();
+        AtomicBoolean completed = new AtomicBoolean();
 
         Optional<VoiceBackend.VoicePlayback> handle = voice.startLocationalPlayback(
                 level,
@@ -211,19 +235,29 @@ public final class PlaybackService {
                         ? accessPolicy.canPlay(pin, candidate, operator)
                         : accessPolicy.canPlay(pin, candidate, false),
                 recording,
-                () -> onPlaybackFinished(player.getServer(), channelId));
+                () -> {
+                    completed.set(true);
+                    onPlaybackFinished(server, channelId);
+                });
 
         if (handle.isEmpty()) {
-            release(reservationOwner);
             sendError(player, EchoPinError.INTERNAL_ERROR);
             return;
         }
 
-        byChannel.put(channelId, new ActivePlayback(pin.id(), listener, handle.get()));
-        release(reservationOwner);
+        ActivePlayback active = new ActivePlayback(pin.id(), listener, handle.get());
+        byChannel.put(channelId, active);
         readState.markRead(listener, pin.id());
         EchoPinsNetwork.sendTo(player, new ClientboundPayloads.PlaybackState(
                 pin.id(), PlaybackPhase.STARTED, recording.durationMillis()));
+        // A one-frame recording or an immediately closed voice channel can finish on the audio
+        // thread before the handle is registered above. Close that race deterministically.
+        if (completed.get() || handle.get().isFinished()) {
+            if (byChannel.remove(channelId, active)) {
+                EchoPinsNetwork.sendTo(player, new ClientboundPayloads.PlaybackState(
+                        pin.id(), PlaybackPhase.FINISHED, 0));
+            }
+        }
         LOGGER.debug("Started playback of {} for {} on channel {}", pin.id(), listener, channelId);
     }
 
@@ -294,22 +328,41 @@ public final class PlaybackService {
         starting.clear();
     }
 
-    private void reserve(UUID listener) {
-        starting.merge(listener, 1, Integer::sum);
+    private void reserve(UUID listener, UUID requestId) {
+        starting.computeIfAbsent(listener, ignored -> ConcurrentHashMap.newKeySet()).add(requestId);
     }
 
-    private void release(UUID listener) {
-        starting.computeIfPresent(listener, (key, count) -> count <= 1 ? null : count - 1);
+    private boolean release(UUID listener, UUID requestId) {
+        Set<UUID> requests = starting.get(listener);
+        if (requests == null || !requests.remove(requestId)) {
+            return false;
+        }
+        if (requests.isEmpty()) {
+            starting.remove(listener, requests);
+        }
+        return true;
     }
 
     private int countFor(UUID listener) {
-        int count = starting.getOrDefault(listener, 0);
+        Set<UUID> requests = starting.get(listener);
+        int count = requests == null ? 0 : requests.size();
         for (ActivePlayback active : byChannel.values()) {
             if (active.listener().equals(listener) && !active.handle().isFinished()) {
                 count++;
             }
         }
         return count;
+    }
+
+    private void failStarting(MinecraftServer server, UUID listener, UUID requestId,
+                              EchoPinError error) {
+        if (!release(listener, requestId)) {
+            return;
+        }
+        ServerPlayer player = server.getPlayerList().getPlayer(listener);
+        if (player != null) {
+            sendError(player, error);
+        }
     }
 
     private static ServerLevel levelFor(MinecraftServer server, EchoPin pin) {

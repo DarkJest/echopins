@@ -23,7 +23,18 @@ public interface AudioStore {
      *
      * @throws IOException if the recording could not be written
      */
-    AudioRef store(VoiceRecording recording) throws IOException;
+    default AudioRef store(VoiceRecording recording) throws IOException {
+        return store(recording, Long.MAX_VALUE);
+    }
+
+    /**
+     * Writes a recording only if the resulting store total stays at or below {@code maxTotalBytes}.
+     * Implementations must make the capacity check and reservation atomic with respect to other
+     * stores, otherwise simultaneous recordings can both observe the same free space.
+     *
+     * @throws AudioStorageFullException if the new recording would exceed the limit
+     */
+    AudioRef store(VoiceRecording recording, long maxTotalBytes) throws IOException;
 
     /**
      * Loads a recording.

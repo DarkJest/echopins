@@ -15,6 +15,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 
 import java.util.Optional;
 
@@ -50,6 +52,14 @@ public final class AnchorResolver {
             ServerboundPayloads.BlockTarget target = blockTarget.get();
             BlockPos pos = target.pos();
 
+            HitResult serverHit = player.pick(limits.maxCreationDistance(), 0.0F, false);
+            if (!(serverHit instanceof BlockHitResult blockHit)
+                    || serverHit.getType() != HitResult.Type.BLOCK
+                    || !blockHit.getBlockPos().equals(pos)) {
+                throw new EchoPinException(EchoPinError.CANNOT_CREATE_HERE,
+                        "Client block target " + pos + " did not match the server ray trace");
+            }
+
             if (!player.level().isInWorldBounds(pos)) {
                 throw new EchoPinException(EchoPinError.CANNOT_CREATE_HERE,
                         "Block target " + pos + " is outside world bounds");
@@ -69,7 +79,7 @@ public final class AnchorResolver {
                         "Block target " + pos + " is air");
             }
 
-            BlockFace face = toBlockFace(target.faceId());
+            BlockFace face = toBlockFace(blockHit.getDirection());
             try {
                 return new BlockAnchor(dimension, pos.getX(), pos.getY(), pos.getZ(), face);
             } catch (IllegalArgumentException e) {
@@ -107,12 +117,7 @@ public final class AnchorResolver {
         return DimensionId.of(location.getNamespace(), location.getPath());
     }
 
-    private static BlockFace toBlockFace(int faceId) {
-        // The wire value is a Minecraft Direction ordinal; map it onto the domain's own enum
-        // rather than trusting the two orderings to stay aligned.
-        Direction direction = faceId >= 0 && faceId < Direction.values().length
-                ? Direction.values()[faceId]
-                : Direction.UP;
+    private static BlockFace toBlockFace(Direction direction) {
         return switch (direction) {
             case DOWN -> BlockFace.DOWN;
             case UP -> BlockFace.UP;

@@ -223,7 +223,7 @@ public final class EchoPinsServer implements EchoPinsNetwork.ServerRequestHandle
 
     /** A dimension change ends any recording: the anchor would no longer be where the player is. */
     public void onDimensionChanged(ServerPlayer player) {
-        if (recordingService.isRecording(player.getUUID())) {
+        if (recordingService.hasRecordingState(player.getUUID())) {
             recordingService.cancel(player);
             sendError(player, EchoPinError.CANNOT_CREATE_HERE);
         }
@@ -232,7 +232,7 @@ public final class EchoPinsServer implements EchoPinsNetwork.ServerRequestHandle
 
     /** Death ends a recording too, since the player is about to be somewhere else entirely. */
     public void onPlayerDied(ServerPlayer player) {
-        if (recordingService.isRecording(player.getUUID())) {
+        if (recordingService.hasRecordingState(player.getUUID())) {
             recordingService.cancel(player);
         }
     }
@@ -452,6 +452,9 @@ public final class EchoPinsServer implements EchoPinsNetwork.ServerRequestHandle
     public List<ClientboundPayloads.KnownPlayer> knownPlayers(ServerPlayer viewer) {
         Map<UUID, ClientboundPayloads.KnownPlayer> byUuid = new LinkedHashMap<>();
         for (ServerPlayer online : server.getPlayerList().getPlayers()) {
+            if (byUuid.size() >= ClientboundPayloads.KnownPlayers.MAX_PLAYERS) {
+                break;
+            }
             if (!online.getUUID().equals(viewer.getUUID())) {
                 byUuid.put(online.getUUID(), new ClientboundPayloads.KnownPlayer(
                         online.getUUID(), online.getGameProfile().getName(), true));

@@ -9,6 +9,26 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Nothing yet.
 
+## [1.1.1] — 2026-08-10
+
+### Fixed
+
+- Enforced the total audio-storage quota atomically, including the incoming recording, so
+  concurrent saves cannot overfill the configured limit.
+- Closed recording and playback races around disconnects, reconnects, death, dimension changes,
+  shutdown and immediately completed voice channels.
+- Revalidated block placement with a server-side ray trace instead of trusting the client target.
+- Preserved world data written by a newer schema instead of downgrading and destroying unknown
+  fields during autosave.
+- Bounded the known-player response on servers with more than 256 players.
+- Corrected CI and release artifact paths for the Fabric/NeoForge multi-project layout; releases
+  now attach both loader jars and their checksums.
+
+### Changed
+
+- Refreshed banners and UI mockups, with AI-assisted backdrops explicitly labelled as mockups.
+- Updated installation copy and loader badges to present Fabric and NeoForge equally.
+
 ## [1.1.0] — 2026-08-10
 
 Fabric support. The mod's behaviour on NeoForge is unchanged: every fix below is in code that has
@@ -204,6 +224,8 @@ release workflow publishes, since that is built from the tagged commit.
 - The manual integration matrix in `docs/TESTING.md` has not been executed end to end on a live
   multi-client server.
 
-[Unreleased]: https://github.com/DarkJest/echopins/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/DarkJest/echopins/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/DarkJest/echopins/compare/v1.1.0...v1.1.1
+[1.1.0]: https://github.com/DarkJest/echopins/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/DarkJest/echopins/releases/tag/v1.0.1
 [1.0.0]: https://github.com/DarkJest/echopins/releases/tag/v1.0.0
