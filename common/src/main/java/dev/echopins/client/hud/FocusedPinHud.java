@@ -6,11 +6,9 @@ import dev.echopins.client.state.ClientPinState;
 import dev.echopins.domain.visibility.Visibility;
 import dev.echopins.infrastructure.network.PinSummary;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 
@@ -25,7 +23,7 @@ import java.util.Locale;
  * only when the crosshair is actually on a pin within interaction range, so it is absent the rest
  * of the time.
  */
-public final class FocusedPinHud implements LayeredDraw.Layer {
+public final class FocusedPinHud {
 
     private static final int COLOR_BACKGROUND = 0xB4101418;
     private static final int COLOR_TITLE = 0xFFE9F3F5;
@@ -34,8 +32,7 @@ public final class FocusedPinHud implements LayeredDraw.Layer {
     private static final int COLOR_UNREAD = 0xFFE5A03D;
     private static final int PADDING = 5;
 
-    @Override
-    public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
+    public void render(GuiGraphics graphics, float partialTick) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.level == null || minecraft.options.hideGui) {
             return;

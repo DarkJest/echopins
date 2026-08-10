@@ -13,7 +13,7 @@ import dev.echopins.EchoPins;
 /**
  * The Simple Voice Chat plugin entry point.
  *
- * <p>Simple Voice Chat discovers this class by scanning NeoForge mod files for
+ * <p>Simple Voice Chat discovers this class by scanning Forge and NeoForge mod files for
  * {@link ForgeVoicechatPlugin} and instantiating it through its no-argument constructor. It is
  * therefore constructed by Simple Voice Chat, not by EchoPins, which is why all state lives in
  * {@link SimpleVoiceChatBackend} and this class is only a thin forwarder.

@@ -16,7 +16,6 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.client.DeltaTracker;
 
 /**
  * Fabric client entry point.
@@ -52,10 +51,9 @@ public final class EchoPinsFabricClient implements ClientModInitializer {
         // Fabric has one HUD callback rather than named layers, so the three panels are drawn in
         // the same order NeoForge stacks them.
         HudRenderCallback.EVENT.register((graphics, tickDelta) -> {
-            DeltaTracker delta = net.minecraft.client.Minecraft.getInstance().getTimer();
-            focusedPinHud.render(graphics, delta);
-            nowPlayingHud.render(graphics, delta);
-            recordingHud.render(graphics, delta);
+            focusedPinHud.render(graphics, tickDelta);
+            nowPlayingHud.render(graphics, tickDelta);
+            recordingHud.render(graphics, tickDelta);
         });
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) ->

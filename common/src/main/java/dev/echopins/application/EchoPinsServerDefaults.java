@@ -3,9 +3,9 @@ package dev.echopins.application;
 /**
  * Default values for every server option.
  *
- * <p>Single source of truth for both loaders. NeoForge stores configuration through its own config
- * system and Fabric through a JSON file; keeping the numbers here means neither can quietly
- * disagree with the other about what an untouched install does.
+ * <p>Single source of truth for all loaders. Forge and NeoForge use their config system and Fabric
+ * uses a JSON file; keeping the numbers here prevents loader builds from disagreeing about what an
+ * untouched install does.
  *
  * <p>Chosen so that an admin who never opens the config still gets a server that cannot be filled
  * up: pins expire after a week, storage is capped, and creating and playing are both rate limited.

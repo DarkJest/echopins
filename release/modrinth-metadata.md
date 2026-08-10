@@ -44,13 +44,13 @@ None apply, and mis-tagging is the fastest way to annoy people browsing.
 
 | Field | Value |
 |---|---|
-| Game versions | `1.21.1` |
-| Loaders | `neoforge`, `fabric` — set per file, not per version |
-| Version number | `1.1.0` |
-| Version name | `EchoPins 1.1.0 for 1.21.1` |
-| Channel | see below |
+| Game versions | `1.20.1` |
+| Loaders | `fabric`, `forge`, `neoforge` |
+| Version number | `1.2.0-beta.1` |
+| Version name | `EchoPins 1.2.0-beta.1 for 1.20.1` |
+| Channel | `beta` |
 | Changelog | contents of `modrinth-changelog.md` |
-| Files | `echopins-neoforge-1.1.0+mc1.21.1.jar`, `echopins-fabric-1.1.0+mc1.21.1.jar` |
+| Files | `echopins-fabric-1.2.0-beta.1+mc1.20.1.jar`, `echopins-forge-1.2.0-beta.1+mc1.20.1.jar`, `echopins-neoforge-1.2.0-beta.1+mc1.20.1.jar` |
 
 Modrinth allows several files under one version. Upload both and mark the NeoForge jar primary,
 or create two versions if you would rather the loaders have separate changelog entries. Add
@@ -73,7 +73,7 @@ At the time of writing, the automated build and unit tests pass, and the multi-c
 
 | Project | Type | Notes |
 |---|---|---|
-| `simple-voice-chat` | **Required** | Version 2.6.20 or newer for 1.21.1. EchoPins depends on the `voicechat_api` mod id that Simple Voice Chat ships inside its own jar. |
+| `simple-voice-chat` | **Required** | Version 2.6.20 or newer for 1.20.1. EchoPins depends on the `voicechat_api` mod id that Simple Voice Chat ships inside its own jar. |
 
 No optional or embedded dependencies. Nothing is bundled.
 

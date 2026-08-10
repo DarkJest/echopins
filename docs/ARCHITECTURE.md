@@ -13,7 +13,7 @@
 
 ## Project layout
 
-EchoPins builds for two loaders from one source tree.
+EchoPins builds for Fabric, Forge and NeoForge from one source tree.
 
 ```
 common/    everything that is not loader-specific - 77 of the 92 source files
@@ -89,7 +89,7 @@ flowchart TB
         CS[(ClientPinState)]
     end
 
-    subgraph Net["Payloads (protocol v1, shared by both loaders)"]
+    subgraph Net["Payloads (protocol v1, shared by all loaders)"]
         SB[Serverbound<br/>BeginRecording, FinishRecording, CancelRecording,<br/>CreatePin, RequestPlayback, DeletePin,<br/>RequestInbox, MarkRead]
         CB[Clientbound<br/>ServerSettings, PinsSnapshot, PinsDelta,<br/>RecordingState, PlaybackState,<br/>ErrorMessage, InboxPage, KnownPlayers]
     end
@@ -159,11 +159,11 @@ flowchart LR
 
 Two things worth calling out:
 
-- **Simple Voice Chat constructs the plugin**, not EchoPins. On NeoForge it scans mod files for
-  the `@ForgeVoicechatPlugin` annotation; on Fabric it reads the `voicechat_plugins` entrypoint.
+- **Simple Voice Chat constructs the plugin**, not EchoPins. On Forge and NeoForge it scans mod
+  files for the `@ForgeVoicechatPlugin` annotation; on Fabric it reads the `voicechat` entrypoint.
   Either way it instantiates the class through its no-arg constructor, so all state lives in the
   singleton adapter and the discovered class is a thin forwarder. This is the one place where the
-  two loaders each need their own class, and it is why that class contains no logic.
+  loader families each need their own class, and it is why that class contains no logic.
 - **Audio is never transcoded.** `AudioChannel.send(byte[])` accepts encoded Opus, so frames go
   microphone → disk → channel unchanged. No decode/re-encode round trip, no generational quality
   loss, and playback costs almost nothing.

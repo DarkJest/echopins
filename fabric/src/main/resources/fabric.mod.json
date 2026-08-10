@@ -16,13 +16,13 @@
   "entrypoints": {
     "main": ["dev.echopins.fabric.EchoPinsFabric"],
     "client": ["dev.echopins.fabric.client.EchoPinsFabricClient"],
-    "voicechat_plugins": ["dev.echopins.fabric.voicechat.EchoPinsFabricVoicechatPlugin"]
+    "voicechat": ["dev.echopins.fabric.voicechat.EchoPinsFabricVoicechatPlugin"]
   },
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
     "minecraft": "${minecraft_version_range}",
     "java": ">=${java_version}",
     "fabric-api": "*",
-    "voicechat": ">=${voicechat_api_version}"
+    "voicechat_api": ">=${voicechat_api_version}"
   }
 }

@@ -6,8 +6,7 @@ import dev.echopins.domain.pin.EchoPin;
 import dev.echopins.domain.pin.PinId;
 import dev.echopins.domain.visibility.Visibility;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import dev.echopins.infrastructure.network.PacketCodec;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -40,8 +39,8 @@ public record PinSummary(
         Optional<String> caption,
         boolean unread) {
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, PinSummary> STREAM_CODEC =
-            StreamCodec.of(PinSummary::write, PinSummary::read);
+    public static final PacketCodec<PinSummary> STREAM_CODEC =
+            PacketCodec.of(PinSummary::write, PinSummary::read);
 
     /** Builds the view of {@code pin} shown to {@code viewer}. */
     public static PinSummary of(EchoPin pin, boolean unread) {

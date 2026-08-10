@@ -17,8 +17,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 /**
  * Fabric entry point.
  *
- * <p>Wiring only: it maps Fabric's events onto the same loader-agnostic services the NeoForge
- * build uses. Nothing here decides behaviour.
+ * <p>Wiring only: it maps Fabric's events onto the same loader-agnostic services the Forge-family
+ * builds use. Nothing here decides behaviour.
  */
 public final class EchoPinsFabric implements ModInitializer {
 

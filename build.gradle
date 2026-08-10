@@ -1,4 +1,4 @@
-// Settings shared by both loader projects. `common` is a plain source directory rather than a
+// Settings shared by all loader projects. `common` is a plain source directory rather than a
 // subproject, because it has no loader and so nothing to compile Minecraft against by itself.
 subprojects {
     apply plugin: 'java'
@@ -26,7 +26,7 @@ subprojects {
     }
 
     sourceSets {
-        // Both loaders compile the shared sources themselves. Mojang mappings on both sides mean
+        // Every loader compiles the shared sources itself. Mojang mappings on every target mean
         // the same source is valid for each.
         main {
             java.srcDir rootProject.file('common/src/main/java')
@@ -41,7 +41,7 @@ subprojects {
         testImplementation platform('org.junit:junit-bom:5.11.4')
         testImplementation 'org.junit.jupiter:junit-jupiter'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-        // NeoForge and Fabric both supply SLF4J in game, but the tests run in a plain JVM.
+        // All loaders supply SLF4J in game, but the tests run in a plain JVM.
         testImplementation 'org.slf4j:slf4j-api:2.0.9'
         testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.9'
     }
@@ -49,7 +49,16 @@ subprojects {
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
         options.release = Integer.parseInt(java_version)
-        options.compilerArgs << '-Xlint:all,-processing,-serial,-this-escape,-deprecation'
+        // `this-escape` was added after Java 17, which is the toolchain required by MC 1.20.1.
+        options.compilerArgs << '-Xlint:all,-processing,-serial,-deprecation'
+    }
+
+    // Minecraft 1.20.1 runs on Java 17. Keep development launches on the same JVM so a local
+    // Java 21 installation cannot hide accidental use of newer APIs.
+    tasks.withType(JavaExec).configureEach {
+        javaLauncher = javaToolchains.launcherFor {
+            languageVersion = JavaLanguageVersion.of(Integer.parseInt(java_version))
+        }
     }
 
     tasks.withType(Javadoc).configureEach {

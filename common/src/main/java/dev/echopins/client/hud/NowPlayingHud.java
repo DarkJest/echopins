@@ -5,11 +5,9 @@ import dev.echopins.client.keybind.EchoPinsKeybinds;
 import dev.echopins.client.state.ClientPinState;
 import dev.echopins.domain.pin.PinId;
 import dev.echopins.infrastructure.network.PinSummary;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
@@ -25,7 +23,7 @@ import java.util.List;
  * <p>Sits below the recording indicator so the two never overlap - they cannot both be active,
  * but the positions are configurable and a player could anchor them to the same corner.
  */
-public final class NowPlayingHud implements LayeredDraw.Layer {
+public final class NowPlayingHud {
 
     private static final int PADDING = 5;
     private static final int ROW_HEIGHT = 11;
@@ -42,8 +40,7 @@ public final class NowPlayingHud implements LayeredDraw.Layer {
     private static final int COLOR_ACCENT = 0xFF2FB6C4;
     private static final int COLOR_MUTED = 0xFF9BB0B6;
 
-    @Override
-    public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
+    public void render(GuiGraphics graphics, float partialTick) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.options.hideGui) {
             return;

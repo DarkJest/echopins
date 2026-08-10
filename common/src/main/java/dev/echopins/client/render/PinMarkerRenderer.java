@@ -38,9 +38,9 @@ import java.util.List;
 public final class PinMarkerRenderer {
 
     private static final ResourceLocation MARKER_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EchoPins.MOD_ID, "textures/gui/pin_marker.png");
+            new ResourceLocation(EchoPins.MOD_ID, "textures/gui/pin_marker.png");
     private static final ResourceLocation MARKER_PRIVATE_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(EchoPins.MOD_ID, "textures/gui/pin_marker_private.png");
+            new ResourceLocation(EchoPins.MOD_ID, "textures/gui/pin_marker_private.png");
 
     /** Base half-size of the billboard, in blocks. */
     private static final float BASE_HALF_SIZE = 0.22F;
@@ -196,10 +196,18 @@ public final class PinMarkerRenderer {
      * not exist.
      */
     private static void quad(VertexConsumer consumer, Matrix4f matrix, int colour, int light) {
-        consumer.addVertex(matrix, -1.0F, -1.0F, 0.0F).setColor(colour).setUv(0.0F, 1.0F).setLight(light);
-        consumer.addVertex(matrix, 1.0F, -1.0F, 0.0F).setColor(colour).setUv(1.0F, 1.0F).setLight(light);
-        consumer.addVertex(matrix, 1.0F, 1.0F, 0.0F).setColor(colour).setUv(1.0F, 0.0F).setLight(light);
-        consumer.addVertex(matrix, -1.0F, 1.0F, 0.0F).setColor(colour).setUv(0.0F, 0.0F).setLight(light);
+        int alpha = colour >>> 24;
+        int red = colour >>> 16 & 0xFF;
+        int green = colour >>> 8 & 0xFF;
+        int blue = colour & 0xFF;
+        consumer.vertex(matrix, -1.0F, -1.0F, 0.0F).color(red, green, blue, alpha)
+                .uv(0.0F, 1.0F).uv2(light).endVertex();
+        consumer.vertex(matrix, 1.0F, -1.0F, 0.0F).color(red, green, blue, alpha)
+                .uv(1.0F, 1.0F).uv2(light).endVertex();
+        consumer.vertex(matrix, 1.0F, 1.0F, 0.0F).color(red, green, blue, alpha)
+                .uv(1.0F, 0.0F).uv2(light).endVertex();
+        consumer.vertex(matrix, -1.0F, 1.0F, 0.0F).color(red, green, blue, alpha)
+                .uv(0.0F, 0.0F).uv2(light).endVertex();
     }
 
     private static boolean shouldSeeThrough(double distance) {

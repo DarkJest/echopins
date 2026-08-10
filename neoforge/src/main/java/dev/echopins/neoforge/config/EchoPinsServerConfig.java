@@ -1,7 +1,7 @@
 package dev.echopins.neoforge.config;
 
 import dev.echopins.application.EchoPinsServerDefaults;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 /**
  * Server-authoritative limits, security and storage settings.
@@ -15,50 +15,50 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  */
 public final class EchoPinsServerConfig {
 
-    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    public static final ModConfigSpec.BooleanValue ENABLED;
+    public static final ForgeConfigSpec.BooleanValue ENABLED;
 
-    public static final ModConfigSpec.IntValue MAX_RECORDING_SECONDS;
-    public static final ModConfigSpec.IntValue MIN_RECORDING_MILLIS;
-    public static final ModConfigSpec.IntValue RECORDING_SESSION_TIMEOUT_SECONDS;
-    public static final ModConfigSpec.BooleanValue SUPPRESS_PROXIMITY_WHILE_RECORDING;
+    public static final ForgeConfigSpec.IntValue MAX_RECORDING_SECONDS;
+    public static final ForgeConfigSpec.IntValue MIN_RECORDING_MILLIS;
+    public static final ForgeConfigSpec.IntValue RECORDING_SESSION_TIMEOUT_SECONDS;
+    public static final ForgeConfigSpec.BooleanValue SUPPRESS_PROXIMITY_WHILE_RECORDING;
 
-    public static final ModConfigSpec.IntValue MAX_PINS_PER_PLAYER;
-    public static final ModConfigSpec.IntValue MAX_TOTAL_PINS;
-    public static final ModConfigSpec.IntValue MAX_PINS_NEARBY;
-    public static final ModConfigSpec.IntValue MAX_CAPTION_LENGTH;
-    public static final ModConfigSpec.IntValue MAX_PRIVATE_RECIPIENTS;
+    public static final ForgeConfigSpec.IntValue MAX_PINS_PER_PLAYER;
+    public static final ForgeConfigSpec.IntValue MAX_TOTAL_PINS;
+    public static final ForgeConfigSpec.IntValue MAX_PINS_NEARBY;
+    public static final ForgeConfigSpec.IntValue MAX_CAPTION_LENGTH;
+    public static final ForgeConfigSpec.IntValue MAX_PRIVATE_RECIPIENTS;
 
-    public static final ModConfigSpec.DoubleValue DISCOVERY_RADIUS;
-    public static final ModConfigSpec.DoubleValue INTERACTION_RADIUS;
-    public static final ModConfigSpec.DoubleValue MAX_CREATION_DISTANCE;
-    public static final ModConfigSpec.DoubleValue PLAYBACK_AUDIO_DISTANCE;
-    public static final ModConfigSpec.IntValue MAX_SYNCED_PINS_PER_PLAYER;
-    public static final ModConfigSpec.IntValue SYNC_INTERVAL_TICKS;
+    public static final ForgeConfigSpec.DoubleValue DISCOVERY_RADIUS;
+    public static final ForgeConfigSpec.DoubleValue INTERACTION_RADIUS;
+    public static final ForgeConfigSpec.DoubleValue MAX_CREATION_DISTANCE;
+    public static final ForgeConfigSpec.DoubleValue PLAYBACK_AUDIO_DISTANCE;
+    public static final ForgeConfigSpec.IntValue MAX_SYNCED_PINS_PER_PLAYER;
+    public static final ForgeConfigSpec.IntValue SYNC_INTERVAL_TICKS;
 
-    public static final ModConfigSpec.IntValue DEFAULT_EXPIRY_HOURS;
-    public static final ModConfigSpec.BooleanValue ALLOW_PERMANENT_PINS;
+    public static final ForgeConfigSpec.IntValue DEFAULT_EXPIRY_HOURS;
+    public static final ForgeConfigSpec.BooleanValue ALLOW_PERMANENT_PINS;
 
-    public static final ModConfigSpec.IntValue CREATE_COOLDOWN_SECONDS;
-    public static final ModConfigSpec.IntValue PLAYBACK_COOLDOWN_MILLIS;
-    public static final ModConfigSpec.IntValue MAX_CONCURRENT_PLAYBACKS_PER_PLAYER;
-    public static final ModConfigSpec.IntValue REQUEST_BURST_CAPACITY;
-    public static final ModConfigSpec.DoubleValue REQUEST_REFILL_PER_SECOND;
+    public static final ForgeConfigSpec.IntValue CREATE_COOLDOWN_SECONDS;
+    public static final ForgeConfigSpec.IntValue PLAYBACK_COOLDOWN_MILLIS;
+    public static final ForgeConfigSpec.IntValue MAX_CONCURRENT_PLAYBACKS_PER_PLAYER;
+    public static final ForgeConfigSpec.IntValue REQUEST_BURST_CAPACITY;
+    public static final ForgeConfigSpec.DoubleValue REQUEST_REFILL_PER_SECOND;
 
-    public static final ModConfigSpec.IntValue MAX_AUDIO_BYTES_PER_PIN;
-    public static final ModConfigSpec.LongValue MAX_TOTAL_AUDIO_STORAGE_BYTES;
+    public static final ForgeConfigSpec.IntValue MAX_AUDIO_BYTES_PER_PIN;
+    public static final ForgeConfigSpec.LongValue MAX_TOTAL_AUDIO_STORAGE_BYTES;
 
-    public static final ModConfigSpec.BooleanValue ORPHAN_CLEANUP;
-    public static final ModConfigSpec.IntValue ORPHAN_CLEANUP_INTERVAL_MINUTES;
-    public static final ModConfigSpec.BooleanValue EXPIRED_PIN_CLEANUP;
-    public static final ModConfigSpec.IntValue EXPIRED_PIN_CLEANUP_INTERVAL_SECONDS;
-    public static final ModConfigSpec.IntValue EXPIRED_PIN_CLEANUP_BATCH;
+    public static final ForgeConfigSpec.BooleanValue ORPHAN_CLEANUP;
+    public static final ForgeConfigSpec.IntValue ORPHAN_CLEANUP_INTERVAL_MINUTES;
+    public static final ForgeConfigSpec.BooleanValue EXPIRED_PIN_CLEANUP;
+    public static final ForgeConfigSpec.IntValue EXPIRED_PIN_CLEANUP_INTERVAL_SECONDS;
+    public static final ForgeConfigSpec.IntValue EXPIRED_PIN_CLEANUP_BATCH;
 
-    public static final ModConfigSpec.BooleanValue OPERATOR_BYPASS_LIMITS;
-    public static final ModConfigSpec.IntValue OPERATOR_PERMISSION_LEVEL;
+    public static final ForgeConfigSpec.BooleanValue OPERATOR_BYPASS_LIMITS;
+    public static final ForgeConfigSpec.IntValue OPERATOR_PERMISSION_LEVEL;
 
-    public static final ModConfigSpec SPEC;
+    public static final ForgeConfigSpec SPEC;
 
     static {
         BUILDER.comment("EchoPins server settings.",

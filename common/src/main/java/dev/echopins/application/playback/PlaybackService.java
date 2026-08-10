@@ -366,7 +366,7 @@ public final class PlaybackService {
     }
 
     private static ServerLevel levelFor(MinecraftServer server, EchoPin pin) {
-        ResourceLocation location = ResourceLocation.fromNamespaceAndPath(
+        ResourceLocation location = new ResourceLocation(
                 pin.anchor().dimension().namespace(), pin.anchor().dimension().path());
         for (ServerLevel level : server.getAllLevels()) {
             if (level.dimension().location().equals(location)) {

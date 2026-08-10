@@ -19,8 +19,8 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.Optional;
 import java.util.Set;
@@ -143,10 +143,7 @@ public final class EchoPinsGameTests {
      */
     @GameTest(template = TEMPLATE)
     public static void savedDataRoundTripRebuildsRepositoryAndIndex(GameTestHelper helper) {
-        var server = helper.getLevel().getServer();
-        var registries = server.registryAccess();
-
-        EchoPinsSavedData data = EchoPinsSavedData.factory().constructor().get();
+        EchoPinsSavedData data = EchoPinsSavedData.empty();
         EchoPin near = samplePin(
                 new PositionAnchor(DimensionId.parse("minecraft:overworld"), new WorldPos(10, 64, 10)),
                 Visibility.PUBLIC, Set.of(), EchoPin.NEVER_EXPIRES);
@@ -157,8 +154,8 @@ public final class EchoPinsGameTests {
         data.pins().save(far);
         data.readState().markRead(near.authorUuid(), near.id());
 
-        CompoundTag saved = data.save(new CompoundTag(), registries);
-        EchoPinsSavedData reloaded = EchoPinsSavedData.factory().deserializer().apply(saved, registries);
+        CompoundTag saved = data.save(new CompoundTag());
+        EchoPinsSavedData reloaded = EchoPinsSavedData.fromTag(saved);
 
         if (reloaded.pins().totalCount() != 2) {
             helper.fail("Expected 2 pins after reload, got " + reloaded.pins().totalCount());

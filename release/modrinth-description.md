@@ -71,15 +71,15 @@ It is most useful on a server where people play at different times. That is what
 
 ---
 
-## Requirements
+## Supported versions
 
-| | |
-|---|---|
-| Minecraft | 1.21.1 |
-| Loader | NeoForge 21.1.0+ or Fabric Loader 0.19.3+ |
-| Also required on Fabric | Fabric API |
-| Java | 21 |
-| **Required** | [Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat) for 1.21.1 (2.6.20+) |
+| Minecraft | Fabric | Forge | NeoForge | Java |
+|---|---:|---:|---:|---:|
+| **1.21.1** | Yes | — | Yes | 21 |
+| **1.20.1** | Yes | Yes | Yes | 17 |
+
+Use the EchoPins and [Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat) files made
+for your exact Minecraft version and loader. Fabric also requires Fabric API.
 
 **EchoPins must be installed on both the client and the server.** So must Simple Voice Chat.
 

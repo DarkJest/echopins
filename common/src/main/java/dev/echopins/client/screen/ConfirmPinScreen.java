@@ -189,8 +189,8 @@ public final class ConfirmPinScreen extends Screen {
 
     /** Panel and labels go behind the widgets; see the note in {@code InboxScreen}. */
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void renderBackground(GuiGraphics graphics) {
+        super.renderBackground(graphics);
 
         int left = (this.width - PANEL_WIDTH) / 2;
         int top = this.height / 2 - 70;

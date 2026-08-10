@@ -32,9 +32,10 @@ One jar per loader, built from the same commit:
 ```
 echopins-neoforge-<version>+mc<minecraft>.jar
 echopins-fabric-<version>+mc<minecraft>.jar
+echopins-forge-<version>+mc<minecraft>.jar
 ```
 
-for example `echopins-neoforge-1.1.0+mc1.21.1.jar`.
+for example `echopins-neoforge-1.1.1+mc1.20.1.jar`.
 
 The loader is part of the base name and the Minecraft version is build metadata on the archive
 version, so Gradle does not append the raw version a second time.
@@ -46,7 +47,7 @@ version, so Gradle does not append the raw version a second time.
 
 The build aims to be deterministic:
 
-- Java toolchain pinned to 21 via `java.toolchain`, so the JDK on the machine does not matter.
+- Java toolchain pinned to 17 via `java.toolchain`, so the JDK on the machine does not matter.
 - UTF-8 forced for compilation and Javadoc.
 - `preserveFileTimestamps = false` and `reproducibleFileOrder = true` on every archive task, so a
   rebuild of the same commit produces a byte-identical jar.
@@ -80,8 +81,8 @@ Triggered by a `v*` tag, or manually with a tag input.
 
 The important design decision: **GitHub release creation and mod-site publishing are separate
 jobs.** The GitHub release is the source of truth and must never be blocked by a third-party API
-being down or a token being absent. The publishing job is `continue-on-error` and checks for
-credentials first, skipping cleanly with an explanatory message if none are configured.
+being down or a token being absent. The publishing job is `continue-on-error`, checks for
+credentials first, and publishes tags containing a prerelease suffix as beta versions.
 
 The workflow also refuses to release if the tag does not match `mod_version`. Publishing
 `v1.0.1` from a tree that still says `1.0.0` is a mistake that is very annoying to undo on
@@ -127,11 +128,12 @@ Pick from what has actually been tested:
 
 - **Release** — the manual matrix in [TESTING.md](TESTING.md) has been run on a live dedicated
   server with two or more clients.
-- **Beta** — build and unit tests pass, multi-client testing has not happened.
+- **Beta** — build, unit tests and dedicated-server smoke tests pass, but multi-client testing has
+  not happened.
 
 A `1.0.0` that has never been run with two clients is a beta with a confident version number. Ship
-it as `0.1.0-beta` instead; the tag suffix also makes `release.yml` mark the GitHub release as a
-prerelease automatically and skip mod-site publishing.
+it as `0.1.0-beta` instead; the tag suffix also makes `release.yml` mark the GitHub release and
+the Modrinth/CurseForge files as beta automatically.
 
 ## Hotfixes
 

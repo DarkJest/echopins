@@ -10,7 +10,7 @@ tasks.withType(AbstractArchiveTask).configureEach {
 
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
-    // Mojang mappings on both loaders is what lets `common` compile unchanged for each.
+    // Mojang mappings on every loader are what lets `common` compile unchanged for each.
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
@@ -19,12 +19,23 @@ dependencies {
     // treat it as a mod and does not try to remap it.
     compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
 
-    // Deliberately NOT a dev-runtime dependency. Loom refuses to process a mod jar built with a
-    // newer Loom than the one in use, and the Loom versions that accept the current Simple Voice
-    // Chat build require Gradle 9, which ModDevGradle does not support. Rather than split the
-    // build across two Gradle versions, the Fabric dev runtime goes without Simple Voice Chat:
-    // the jar still builds and the shared code is still covered by the NeoForge dev environment,
-    // where the integration can be exercised end to end. See docs/ARCHITECTURE.md.
+}
+
+// Current Simple Voice Chat Fabric jars were produced by a newer Loom than this multi-loader
+// Gradle build can use. Resolving the jar through a plain configuration and copying it to the
+// normal mods directory lets Fabric Loader perform its development remap without asking Loom to
+// process the artifact itself.
+configurations {
+    voicechatFabricRuntime
+}
+
+dependencies {
+    voicechatFabricRuntime "maven.modrinth:simple-voice-chat:${voicechat_dev_runtime_fabric}"
+}
+
+tasks.register('prepareVoicechatRuntime', Copy) {
+    from configurations.voicechatFabricRuntime
+    into layout.projectDirectory.dir('run/mods')
 }
 
 loom {
@@ -33,6 +44,9 @@ loom {
         server { server() }
     }
 }
+
+tasks.named('runClient') { dependsOn tasks.named('prepareVoicechatRuntime') }
+tasks.named('runServer') { dependsOn tasks.named('prepareVoicechatRuntime') }
 
 processResources {
     var replaceProperties = [

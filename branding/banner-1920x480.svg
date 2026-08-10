@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="480" viewBox="0 0 1920 480">
-  <title>EchoPins banner: world-anchored voice messages for Fabric and NeoForge</title>
+  <title>EchoPins banner: world-anchored voice messages for Fabric, Forge and NeoForge</title>
   <defs>
     <linearGradient id="bg" x1="0" x2="1">
       <stop offset="0" stop-color="#0A1118"/>
@@ -40,14 +40,18 @@
       <circle cx="28" cy="26" r="7" fill="#2FB6C4"/>
       <text class="pill" x="48" y="34">Fabric</text>
 
-      <rect x="208" width="218" height="52" rx="26" fill="#E5A03D" opacity="0.16" stroke="#E5A03D"/>
-      <circle cx="236" cy="26" r="7" fill="#E5A03D"/>
-      <text class="pill" x="256" y="34">NeoForge</text>
+      <rect x="208" width="180" height="52" rx="26" fill="#D5654B" opacity="0.16" stroke="#D5654B"/>
+      <circle cx="236" cy="26" r="7" fill="#D5654B"/>
+      <text class="pill" x="256" y="34">Forge</text>
 
-      <rect x="444" width="350" height="52" rx="26" fill="#F5FAFB" opacity="0.06" stroke="#4B5D65"/>
-      <text class="pill" x="472" y="34">Simple Voice Chat</text>
+      <rect x="406" width="218" height="52" rx="26" fill="#E5A03D" opacity="0.16" stroke="#E5A03D"/>
+      <circle cx="434" cy="26" r="7" fill="#E5A03D"/>
+      <text class="pill" x="454" y="34">NeoForge</text>
+
+      <rect x="642" width="350" height="52" rx="26" fill="#F5FAFB" opacity="0.06" stroke="#4B5D65"/>
+      <text class="pill" x="670" y="34">Simple Voice Chat</text>
     </g>
-    <text class="fine" x="4" y="292">MINECRAFT 1.21.1  ·  JAVA 21</text>
+    <text class="fine" x="4" y="292">MINECRAFT 1.20.1  ·  JAVA 17</text>
   </g>
 
   <rect x="0" y="474" width="1920" height="6" fill="#2FB6C4"/>

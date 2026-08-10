@@ -2,11 +2,9 @@ package dev.echopins.client.hud;
 
 import dev.echopins.client.ClientSettings;
 import dev.echopins.client.state.ClientPinState;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.network.chat.Component;
 
 import java.util.Locale;
@@ -23,7 +21,7 @@ import java.util.Locale;
  * off with {@code reduceMotion}, and a high-contrast outline is available. The panel is positioned
  * from the scaled screen size, so it lands correctly at any GUI scale and aspect ratio.
  */
-public final class RecordingHud implements LayeredDraw.Layer {
+public final class RecordingHud {
 
     /**
      * Smallest the panel is ever drawn. The real width is measured from the text, because a fixed
@@ -52,8 +50,7 @@ public final class RecordingHud implements LayeredDraw.Layer {
     private static final int COLOR_BAR_FILL = 0xFF2FB6C4;
     private static final int COLOR_BAR_WARNING = 0xFFE5A03D;
 
-    @Override
-    public void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
+    public void render(GuiGraphics graphics, float partialTick) {
         ClientPinState.Recording recording = ClientPinState.INSTANCE.recording();
         if (!recording.isActive()) {
             return;

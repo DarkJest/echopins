@@ -19,8 +19,8 @@ three consequences worth deciding about deliberately:
 
 ```
 mods/
-├── voicechat-neoforge-1.21.1-<version>.jar
-└── echopins-<version>+mc1.21.1-neoforge.jar
+├── voicechat-<loader>-1.20.1-<version>.jar
+└── echopins-<loader>-<version>+mc1.20.1.jar
 ```
 
 Start once, stop, then edit `config/echopins-server.toml` — or `config/echopins-server.json` if

@@ -69,18 +69,17 @@ public final class PinNbtCodec {
         WorldAnchor anchor = pin.anchor();
         tag.putByte(KEY_ANCHOR_KIND, (byte) anchor.kind().id());
         tag.putString(KEY_DIMENSION, anchor.dimension().toString());
-        switch (anchor) {
-            case BlockAnchor block -> {
-                tag.putInt(KEY_BLOCK_X, block.blockX());
-                tag.putInt(KEY_BLOCK_Y, block.blockY());
-                tag.putInt(KEY_BLOCK_Z, block.blockZ());
-                tag.putByte(KEY_FACE, (byte) block.face().id());
-            }
-            case PositionAnchor position -> {
-                tag.putDouble(KEY_X, position.position().x());
-                tag.putDouble(KEY_Y, position.position().y());
-                tag.putDouble(KEY_Z, position.position().z());
-            }
+        if (anchor instanceof BlockAnchor block) {
+            tag.putInt(KEY_BLOCK_X, block.blockX());
+            tag.putInt(KEY_BLOCK_Y, block.blockY());
+            tag.putInt(KEY_BLOCK_Z, block.blockZ());
+            tag.putByte(KEY_FACE, (byte) block.face().id());
+        } else if (anchor instanceof PositionAnchor position) {
+            tag.putDouble(KEY_X, position.position().x());
+            tag.putDouble(KEY_Y, position.position().y());
+            tag.putDouble(KEY_Z, position.position().z());
+        } else {
+            throw new IllegalArgumentException("Unsupported anchor type: " + anchor.getClass());
         }
 
         tag.putLong(KEY_CREATED, pin.createdAt());

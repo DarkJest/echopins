@@ -103,18 +103,17 @@ public final class NetCodecs {
     public static void writeAnchor(FriendlyByteBuf buf, WorldAnchor anchor) {
         buf.writeByte(anchor.kind().id());
         buf.writeUtf(anchor.dimension().toString(), DimensionId.MAX_LENGTH);
-        switch (anchor) {
-            case BlockAnchor block -> {
-                buf.writeVarInt(block.blockX());
-                buf.writeVarInt(block.blockY());
-                buf.writeVarInt(block.blockZ());
-                buf.writeByte(block.face().id());
-            }
-            case PositionAnchor position -> {
-                buf.writeDouble(position.position().x());
-                buf.writeDouble(position.position().y());
-                buf.writeDouble(position.position().z());
-            }
+        if (anchor instanceof BlockAnchor block) {
+            buf.writeVarInt(block.blockX());
+            buf.writeVarInt(block.blockY());
+            buf.writeVarInt(block.blockZ());
+            buf.writeByte(block.face().id());
+        } else if (anchor instanceof PositionAnchor position) {
+            buf.writeDouble(position.position().x());
+            buf.writeDouble(position.position().y());
+            buf.writeDouble(position.position().z());
+        } else {
+            throw new IllegalArgumentException("Unsupported anchor type: " + anchor.getClass());
         }
     }
 

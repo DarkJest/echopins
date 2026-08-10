@@ -15,18 +15,19 @@ cd echopins
 ./gradlew build
 ```
 
-Needs JDK 21. The first build downloads and decompiles Minecraft, so give it a few minutes.
+Needs JDK 17. The first Forge/NeoForge build prepares patched Minecraft artifacts, so give it a few minutes.
 
 | Task | What it does |
 |---|---|
-| `./gradlew build` | Compile and test both loaders, produce both jars |
+| `./gradlew build` | Compile and test all three loaders, produce all three jars |
 | `./gradlew test` | Unit tests only (they run once per loader project) |
+| `./gradlew :forge:runClient` | Forge dev client with Simple Voice Chat on the classpath |
+| `./gradlew :forge:runServer` | Forge dev dedicated server |
 | `./gradlew :neoforge:runClient` | Dev client with Simple Voice Chat on the classpath |
 | `./gradlew :neoforge:runServer` | Dev dedicated server |
-| `./gradlew :neoforge:runGameTestServer` | GameTest harness |
 | `./gradlew :fabric:runClient` | Dev client, **without** Simple Voice Chat — see below |
 
-Development on the voice integration has to happen on NeoForge. Loom refuses to process a mod jar
+Development on the voice integration has to happen on Forge or NeoForge. Loom refuses to process a mod jar
 built with a newer version of Loom than the one in use, and every Loom release that accepts the
 current Simple Voice Chat build requires Gradle 9, which ModDevGradle does not support. Rather than
 split the build across two Gradle versions, the Fabric dev runtime omits Simple Voice Chat. The
@@ -39,7 +40,7 @@ integration can actually be exercised.
 
 These are enforced by review, and breaking one is the fastest way to get a PR sent back.
 
-0. **`common/` imports nothing from either loader.** It is compiled by both `neoforge` and
+0. **`common/` imports nothing from a loader.** It is compiled by `forge`, `neoforge` and
    `fabric` against their own remapped Minecraft. If you need something a loader provides, put the
    loader-specific part in that loader's project and reach it through an interface in `common` —
    `ServerLimits`, `ClientSettings` and `EchoPinsNetwork.Transport` are the existing examples.
@@ -59,7 +60,7 @@ These are enforced by review, and breaking one is the fastest way to get a PR se
 
 ## Style
 
-- Java 21. Records for value objects, sealed interfaces for closed hierarchies, enums over magic
+- Java 17. Records for value objects, sealed interfaces for closed hierarchies, enums over magic
   strings.
 - Comments explain **why**, not what. `// gets the player` above `getPlayer()` will be removed.
 - Javadoc on public interfaces, non-obvious domain abstractions, the binary format, and anything
@@ -103,8 +104,8 @@ Check that long translations still fit their panel. The HUD hint has bitten us o
 Declined for v1 regardless of implementation quality:
 
 speech-to-text · transcription · translation · cloud storage · any external web service · Discord
-integration · an encryption layer over Simple Voice Chat · a database backend · Fabric or Forge
-ports · other Minecraft versions · a mobile or web companion · a global voicemail system · friend
+integration · an encryption layer over Simple Voice Chat · a database backend · ports to other
+loaders · other Minecraft versions · a mobile or web companion · a global voicemail system · friend
 systems · anything resembling a social network
 
 Deliberately deferred, and welcome as a discussion:

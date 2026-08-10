@@ -2,7 +2,7 @@ package dev.echopins.neoforge.config;
 
 import dev.echopins.client.ClientSettings.HudPosition;
 import dev.echopins.client.ClientSettings.OcclusionMode;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 /**
  * Client-side presentation and accessibility preferences.
@@ -13,29 +13,29 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  */
 public final class EchoPinsClientConfig {
 
-    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    public static final ModConfigSpec.BooleanValue SHOW_MARKERS;
-    public static final ModConfigSpec.DoubleValue MARKER_OPACITY;
-    public static final ModConfigSpec.DoubleValue MARKER_SCALE;
-    public static final ModConfigSpec.DoubleValue MARKER_RENDER_DISTANCE;
-    public static final ModConfigSpec.IntValue MAX_RENDERED_MARKERS;
-    public static final ModConfigSpec.EnumValue<OcclusionMode> OCCLUSION_MODE;
-    public static final ModConfigSpec.BooleanValue SHOW_LABELS;
+    public static final ForgeConfigSpec.BooleanValue SHOW_MARKERS;
+    public static final ForgeConfigSpec.DoubleValue MARKER_OPACITY;
+    public static final ForgeConfigSpec.DoubleValue MARKER_SCALE;
+    public static final ForgeConfigSpec.DoubleValue MARKER_RENDER_DISTANCE;
+    public static final ForgeConfigSpec.IntValue MAX_RENDERED_MARKERS;
+    public static final ForgeConfigSpec.EnumValue<OcclusionMode> OCCLUSION_MODE;
+    public static final ForgeConfigSpec.BooleanValue SHOW_LABELS;
 
-    public static final ModConfigSpec.EnumValue<HudPosition> HUD_POSITION;
-    public static final ModConfigSpec.IntValue HUD_OFFSET_X;
-    public static final ModConfigSpec.IntValue HUD_OFFSET_Y;
+    public static final ForgeConfigSpec.EnumValue<HudPosition> HUD_POSITION;
+    public static final ForgeConfigSpec.IntValue HUD_OFFSET_X;
+    public static final ForgeConfigSpec.IntValue HUD_OFFSET_Y;
 
-    public static final ModConfigSpec.BooleanValue AUTO_PLAY_NEARBY;
-    public static final ModConfigSpec.BooleanValue NOTIFICATION_SOUNDS;
-    public static final ModConfigSpec.BooleanValue RECORDING_CUES;
+    public static final ForgeConfigSpec.BooleanValue AUTO_PLAY_NEARBY;
+    public static final ForgeConfigSpec.BooleanValue NOTIFICATION_SOUNDS;
+    public static final ForgeConfigSpec.BooleanValue RECORDING_CUES;
 
-    public static final ModConfigSpec.BooleanValue REDUCE_MOTION;
-    public static final ModConfigSpec.BooleanValue SHOW_CAPTIONS;
-    public static final ModConfigSpec.BooleanValue HIGH_CONTRAST_RECORDING_INDICATOR;
+    public static final ForgeConfigSpec.BooleanValue REDUCE_MOTION;
+    public static final ForgeConfigSpec.BooleanValue SHOW_CAPTIONS;
+    public static final ForgeConfigSpec.BooleanValue HIGH_CONTRAST_RECORDING_INDICATOR;
 
-    public static final ModConfigSpec SPEC;
+    public static final ForgeConfigSpec SPEC;
 
     static {
         BUILDER.comment("How EchoPin markers are drawn in the world.").push("markers");

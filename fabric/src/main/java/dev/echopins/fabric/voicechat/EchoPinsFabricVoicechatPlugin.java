@@ -8,9 +8,9 @@ import dev.echopins.integration.voicechat.EchoPinsVoicechatPlugin;
 /**
  * Simple Voice Chat plugin for the Fabric build.
  *
- * <p>Fabric discovers plugins through the {@code voicechat_plugins} entry point in
+ * <p>Fabric discovers plugins through the {@code voicechat} entry point in
  * {@code fabric.mod.json} rather than through an annotation, which is the only difference from the
- * NeoForge side. Registration is delegated so both loaders share one implementation.
+ * Forge-family side. Registration is delegated so all loaders share one implementation.
  */
 public final class EchoPinsFabricVoicechatPlugin implements VoicechatPlugin {
 

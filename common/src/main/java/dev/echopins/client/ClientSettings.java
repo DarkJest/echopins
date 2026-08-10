@@ -3,11 +3,11 @@ package dev.echopins.client;
 /**
  * Client-side presentation and accessibility preferences, as the rendering code sees them.
  *
- * <p>An interface because the two loaders store configuration differently: NeoForge has its own
- * config system, Fabric has none. Everything that draws reads through here, so neither the HUDs,
- * the marker renderer nor the screens contain a single loader-specific reference.
+ * <p>An interface because the loaders store configuration differently: Forge and NeoForge use
+ * their config system, while Fabric uses a JSON file. Everything that draws reads through here,
+ * so neither the HUDs, the marker renderer nor the screens contain a loader-specific reference.
  *
- * <p>Defaults live in {@link EchoPinsDefaults} so both loaders agree on them without either one
+ * <p>Defaults live in {@link EchoPinsDefaults} so all loaders agree on them without any one
  * being the source of truth.
  */
 public interface ClientSettings {

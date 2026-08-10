@@ -10,7 +10,7 @@ pluginManagement {
 rootProject.name = 'echopins'
 
 // `common` is not a Gradle subproject: it has no loader and therefore no Minecraft to compile
-// against on its own. Both loader projects add its sources directly, each compiling them against
-// its own remapped Minecraft. Both use Mojang mappings, so the same sources compile identically.
+// against on its own. Every loader project adds its sources directly and uses Mojang mappings.
 include 'neoforge'
+include 'forge'
 include 'fabric'

@@ -6,10 +6,11 @@
 
 **Leave a message where it matters.**
 
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen)](https://www.minecraft.net/)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1%20%7C%201.21.1-brightgreen)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Loader-Fabric-DBD0B4)](https://fabricmc.net/)
+[![Forge](https://img.shields.io/badge/Loader-Forge-E04E14)](https://files.minecraftforge.net/)
 [![NeoForge](https://img.shields.io/badge/Loader-NeoForge-F1792B)](https://neoforged.net/)
-[![Java](https://img.shields.io/badge/Java-21-blue)](https://adoptium.net/)
+[![Java](https://img.shields.io/badge/Java-17%20%7C%2021-blue)](https://adoptium.net/)
 [![Requires](https://img.shields.io/badge/Requires-Simple%20Voice%20Chat-9cf)](https://modrinth.com/plugin/simple-voice-chat)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
@@ -71,25 +72,27 @@ Your friends see a small marker when they get close, and press one key to listen
 
 ## Requirements
 
-| | |
-|---|---|
-| Minecraft | 1.21.1 |
-| Loader | NeoForge 21.1.0+ or Fabric Loader 0.19.3+ |
-| Java | 21 |
-| Required mod | [Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat) for 1.21.1 (2.6.20+) |
-| Sides | **Client and server** — both need EchoPins and Simple Voice Chat |
+| Minecraft | Fabric | Forge | NeoForge | Java | Release line |
+|---|---:|---:|---:|---:|---|
+| **1.21.1** | ✅ | — | ✅ | 21 | [Stable v1.1.1](https://github.com/DarkJest/echopins/releases/tag/v1.1.1) / `main` |
+| **1.20.1** | ✅ | ✅ | ✅ | 17 | Beta v1.2.0-beta.1 / branch `1.20.1` |
+
+Both lines remain supported. This branch builds the 1.20.1 artifacts; Minecraft 1.21.1 stays on
+the stable `main` line. Every installation requires matching versions of
+[Simple Voice Chat](https://modrinth.com/plugin/simple-voice-chat) on both client and server;
+Fabric also requires Fabric API.
 
 ## Installation
 
 ### Client
 
-1. Install NeoForge 21.1.x, or Fabric Loader plus Fabric API, for Minecraft 1.21.1.
+1. Install Forge 47.4.x, NeoForge 47.1.x, or Fabric Loader plus Fabric API, for Minecraft 1.20.1.
 2. Drop **Simple Voice Chat** and **EchoPins** into `mods/`.
 3. Launch. Rebind the keys in *Options → Controls → EchoPins* if you like.
 
 ### Server
 
-1. Install NeoForge 21.1.x or Fabric Loader (plus Fabric API).
+1. Install Forge 47.4.x, NeoForge 47.1.x, or Fabric Loader (plus Fabric API).
 2. Drop **Simple Voice Chat** and **EchoPins** into `mods/`.
 3. Start the server once to generate `config/echopins-server.toml` (`.json` on Fabric).
 4. Read [docs/SERVER_SETUP.md](docs/SERVER_SETUP.md) before opening it to the public.

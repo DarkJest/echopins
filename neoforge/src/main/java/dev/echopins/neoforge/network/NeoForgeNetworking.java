@@ -1,59 +1,84 @@
 package dev.echopins.neoforge.network;
 
+import dev.echopins.EchoPins;
 import dev.echopins.infrastructure.network.EchoPinsNetwork;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import dev.echopins.infrastructure.network.EchoPinsPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.simple.SimpleChannel;
 
-/**
- * Binds the shared protocol to NeoForge's networking.
- *
- * <p>Handlers run on the main thread, which is NeoForge's default, so they may touch world state
- * directly. Routing and validation live in {@link EchoPinsNetwork}; this class only connects it.
- */
+import java.util.function.Supplier;
+
+/** Shared Forge/early-NeoForge 1.20.1 SimpleChannel adapter. */
 public final class NeoForgeNetworking {
+
+    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
+            new ResourceLocation(EchoPins.MOD_ID, "main"),
+            () -> EchoPinsNetwork.PROTOCOL_VERSION,
+            EchoPinsNetwork.PROTOCOL_VERSION::equals,
+            EchoPinsNetwork.PROTOCOL_VERSION::equals);
+
+    private static int discriminator;
 
     private NeoForgeNetworking() {
     }
 
-    public static void register(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar(EchoPinsNetwork.PROTOCOL_VERSION);
-
+    public static void register() {
         for (EchoPinsNetwork.PayloadSpec<?> spec : EchoPinsNetwork.serverbound()) {
-            registerServerbound(registrar, spec);
+            registerServerbound(spec);
         }
         for (EchoPinsNetwork.PayloadSpec<?> spec : EchoPinsNetwork.clientbound()) {
-            registerClientbound(registrar, spec);
+            registerClientbound(spec);
         }
 
         EchoPinsNetwork.installTransport(new EchoPinsNetwork.Transport() {
             @Override
-            public void toPlayer(ServerPlayer player, CustomPacketPayload payload) {
-                PacketDistributor.sendToPlayer(player, payload);
+            public void toPlayer(ServerPlayer player, EchoPinsPayload payload) {
+                CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), payload);
             }
 
             @Override
-            public void toServer(CustomPacketPayload payload) {
-                PacketDistributor.sendToServer(payload);
+            public void toServer(EchoPinsPayload payload) {
+                CHANNEL.sendToServer(payload);
             }
         });
     }
 
-    private static <T extends CustomPacketPayload> void registerServerbound(
-            PayloadRegistrar registrar, EchoPinsNetwork.PayloadSpec<T> spec) {
-        registrar.playToServer(spec.type(), spec.codec(), (payload, context) -> {
-            // The sender comes from the connection, never from the payload.
-            if (context.player() instanceof ServerPlayer sender) {
-                EchoPinsNetwork.handleServerbound(sender, payload);
-            }
-        });
+    private static <T extends EchoPinsPayload> void registerServerbound(
+            EchoPinsNetwork.PayloadSpec<T> spec) {
+        CHANNEL.messageBuilder(spec.payloadClass(), discriminator++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder((payload, buffer) -> spec.codec().encode(buffer, payload))
+                .decoder(spec.codec()::decode)
+                .consumerMainThread((payload, context) -> handleServerbound(payload, context))
+                .add();
     }
 
-    private static <T extends CustomPacketPayload> void registerClientbound(
-            PayloadRegistrar registrar, EchoPinsNetwork.PayloadSpec<T> spec) {
-        registrar.playToClient(spec.type(), spec.codec(),
-                (payload, context) -> EchoPinsNetwork.handleClientbound(payload));
+    private static <T extends EchoPinsPayload> void registerClientbound(
+            EchoPinsNetwork.PayloadSpec<T> spec) {
+        CHANNEL.messageBuilder(spec.payloadClass(), discriminator++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder((payload, buffer) -> spec.codec().encode(buffer, payload))
+                .decoder(spec.codec()::decode)
+                .consumerMainThread((payload, context) -> handleClientbound(payload, context))
+                .add();
+    }
+
+    private static void handleServerbound(EchoPinsPayload payload,
+                                          Supplier<NetworkEvent.Context> contextSupplier) {
+        NetworkEvent.Context context = contextSupplier.get();
+        ServerPlayer sender = context.getSender();
+        if (sender != null) {
+            EchoPinsNetwork.handleServerbound(sender, payload);
+        }
+        context.setPacketHandled(true);
+    }
+
+    private static void handleClientbound(EchoPinsPayload payload,
+                                          Supplier<NetworkEvent.Context> contextSupplier) {
+        EchoPinsNetwork.handleClientbound(payload);
+        contextSupplier.get().setPacketHandled(true);
     }
 }

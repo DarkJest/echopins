@@ -2,15 +2,18 @@ plugins {
     id 'net.neoforged.moddev.legacyforge' version '2.0.143'
 }
 
-base { archivesName = "${mod_id}-neoforge" }
+base { archivesName = "${mod_id}-forge" }
 
 tasks.withType(AbstractArchiveTask).configureEach {
     archiveVersion = "${mod_version}+mc${minecraft_version}"
 }
 
+// Forge and the original NeoForge 1.20.1 line expose the same net.minecraftforge API.
+sourceSets.main.java.srcDir rootProject.file('neoforge/src/main/java')
+
 legacyForge {
     enable {
-        neoForgeVersion = project.neo_version
+        forgeVersion = project.forge_version
         disableRecompilation = true
     }
 
@@ -30,16 +33,14 @@ legacyForge {
 }
 
 dependencies {
-    // Provided at runtime by the Simple Voice Chat mod, which ships the `voicechat_api` mod id.
     compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
-    // Dev-runtime only, so the integration can actually be exercised.
     modRuntimeOnly "maven.modrinth:simple-voice-chat:${voicechat_dev_runtime_forge}"
 }
 
 tasks.withType(ProcessResources).configureEach {
     var replaceProperties = [
             minecraft_version_range     : minecraft_version_range,
-            neo_version_range           : neo_version_range,
+            forge_version_range         : forge_version_range,
             loader_version_range        : loader_version_range,
             voicechat_api_version_range : voicechat_api_version_range,
             mod_id                      : mod_id,

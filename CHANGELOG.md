@@ -7,7 +7,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-Nothing yet.
+## [1.2.0-beta.1] — 2026-08-10
+
+### Added
+
+- Added a Minecraft 1.20.1 compatibility line for Fabric, Forge and NeoForge, built with Java 17.
+- Added a dedicated Forge artifact alongside the Fabric and NeoForge jars.
+
+### Changed
+
+- Ported networking, saved data, HUD overlays and rendering to the Minecraft 1.20.1 APIs while
+  preserving the existing wire protocol and world-data schema.
+- Updated CI and release automation to build and publish all three loader artifacts.
+
+### Fixed
+
+- Corrected the Fabric Simple Voice Chat entrypoint so the EchoPins plugin is discovered and its
+  recording and playback events are registered on Minecraft 1.20.1.
 
 ## [1.1.1] — 2026-08-10
 

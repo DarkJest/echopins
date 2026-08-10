@@ -5,9 +5,8 @@ import dev.echopins.domain.error.EchoPinError;
 import dev.echopins.domain.pin.PinId;
 import dev.echopins.infrastructure.network.NetCodecs;
 import dev.echopins.infrastructure.network.PinSummary;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import dev.echopins.infrastructure.network.PacketCodec;
+import dev.echopins.infrastructure.network.EchoPinsPayload;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -27,7 +26,7 @@ public final class ClientboundPayloads {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(EchoPins.MOD_ID, path);
+        return new ResourceLocation(EchoPins.MOD_ID, path);
     }
 
     /**
@@ -37,12 +36,12 @@ public final class ClientboundPayloads {
     public record ServerSettings(double discoveryRadius, double interactionRadius,
                                  int maxRecordingSeconds, int minRecordingMillis,
                                  int maxCaptionLength, int maxPrivateRecipients,
-                                 boolean allowPermanentPins) implements CustomPacketPayload {
+                                 boolean allowPermanentPins) implements EchoPinsPayload {
 
-        public static final Type<ServerSettings> TYPE = new Type<>(id("server_settings"));
+        public static final ResourceLocation TYPE = ClientboundPayloads.id("server_settings");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, ServerSettings> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<ServerSettings> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> {
                             buf.writeDouble(payload.discoveryRadius);
                             buf.writeDouble(payload.interactionRadius);
@@ -59,27 +58,27 @@ public final class ClientboundPayloads {
                                 buf.readBoolean()));
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
 
     /** Replaces the client's whole set of known pins. Sent on join and on dimension change. */
-    public record PinsSnapshot(List<PinSummary> pins) implements CustomPacketPayload {
+    public record PinsSnapshot(List<PinSummary> pins) implements EchoPinsPayload {
 
-        public static final Type<PinsSnapshot> TYPE = new Type<>(id("pins_snapshot"));
+        public static final ResourceLocation TYPE = ClientboundPayloads.id("pins_snapshot");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, PinsSnapshot> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<PinsSnapshot> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> NetCodecs.writeBoundedList(buf, payload.pins,
                                 MAX_SUMMARIES_PER_PACKET,
-                                (b, pin) -> PinSummary.STREAM_CODEC.encode((RegistryFriendlyByteBuf) b, pin)),
+                                (b, pin) -> PinSummary.STREAM_CODEC.encode(b, pin)),
                         buf -> new PinsSnapshot(NetCodecs.readBoundedList(buf,
                                 MAX_SUMMARIES_PER_PACKET,
-                                b -> PinSummary.STREAM_CODEC.decode((RegistryFriendlyByteBuf) b))));
+                                b -> PinSummary.STREAM_CODEC.decode(b))));
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
@@ -88,26 +87,26 @@ public final class ClientboundPayloads {
      * Incremental subscription update. Sent instead of a snapshot while a player moves around,
      * so routine movement costs a few bytes rather than the whole visible set.
      */
-    public record PinsDelta(List<PinSummary> added, List<PinId> removed) implements CustomPacketPayload {
+    public record PinsDelta(List<PinSummary> added, List<PinId> removed) implements EchoPinsPayload {
 
-        public static final Type<PinsDelta> TYPE = new Type<>(id("pins_delta"));
+        public static final ResourceLocation TYPE = ClientboundPayloads.id("pins_delta");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, PinsDelta> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<PinsDelta> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> {
                             NetCodecs.writeBoundedList(buf, payload.added, MAX_SUMMARIES_PER_PACKET,
-                                    (b, pin) -> PinSummary.STREAM_CODEC.encode((RegistryFriendlyByteBuf) b, pin));
+                                    (b, pin) -> PinSummary.STREAM_CODEC.encode(b, pin));
                             NetCodecs.writeBoundedList(buf, payload.removed, MAX_SUMMARIES_PER_PACKET,
                                     NetCodecs::writePinId);
                         },
                         buf -> new PinsDelta(
                                 NetCodecs.readBoundedList(buf, MAX_SUMMARIES_PER_PACKET,
-                                        b -> PinSummary.STREAM_CODEC.decode((RegistryFriendlyByteBuf) b)),
+                                        b -> PinSummary.STREAM_CODEC.decode(b)),
                                 NetCodecs.readBoundedList(buf, MAX_SUMMARIES_PER_PACKET,
                                         NetCodecs::readPinId)));
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
@@ -149,12 +148,12 @@ public final class ClientboundPayloads {
      *                       player thinking the mod is broken and understanding what to do.
      */
     public record RecordingState(RecordingPhase phase, int elapsedMillis, int maxMillis,
-                                 boolean receivingAudio) implements CustomPacketPayload {
+                                 boolean receivingAudio) implements EchoPinsPayload {
 
-        public static final Type<RecordingState> TYPE = new Type<>(id("recording_state"));
+        public static final ResourceLocation TYPE = ClientboundPayloads.id("recording_state");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, RecordingState> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<RecordingState> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> {
                             buf.writeByte(payload.phase.id());
                             buf.writeVarInt(payload.elapsedMillis);
@@ -166,7 +165,7 @@ public final class ClientboundPayloads {
                                 buf.readVarInt(), buf.readVarInt(), buf.readBoolean()));
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
@@ -199,12 +198,12 @@ public final class ClientboundPayloads {
 
     /** Tells the client a pin started or stopped playing, so it can show progress. */
     public record PlaybackState(PinId pin, PlaybackPhase phase,
-                                int durationMillis) implements CustomPacketPayload {
+                                int durationMillis) implements EchoPinsPayload {
 
-        public static final Type<PlaybackState> TYPE = new Type<>(id("playback_state"));
+        public static final ResourceLocation TYPE = ClientboundPayloads.id("playback_state");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, PlaybackState> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<PlaybackState> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> {
                             NetCodecs.writePinId(buf, payload.pin);
                             buf.writeByte(payload.phase.id());
@@ -216,7 +215,7 @@ public final class ClientboundPayloads {
                                 buf.readVarInt()));
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
@@ -227,12 +226,12 @@ public final class ClientboundPayloads {
      * @param error    the reason; the client resolves it to a localized message
      * @param argument optional numeric detail, for example the seconds left on a cooldown
      */
-    public record ErrorMessage(EchoPinError error, Optional<Long> argument) implements CustomPacketPayload {
+    public record ErrorMessage(EchoPinError error, Optional<Long> argument) implements EchoPinsPayload {
 
-        public static final Type<ErrorMessage> TYPE = new Type<>(id("error"));
+        public static final ResourceLocation TYPE = ClientboundPayloads.id("error");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, ErrorMessage> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<ErrorMessage> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> {
                             buf.writeVarInt(payload.error.id());
                             buf.writeBoolean(payload.argument.isPresent());
@@ -251,34 +250,34 @@ public final class ClientboundPayloads {
         }
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
 
     /** One page of inbox results. */
     public record InboxPage(ServerboundPayloads.InboxTab tab, int page, int totalPages,
-                            List<PinSummary> entries) implements CustomPacketPayload {
+                            List<PinSummary> entries) implements EchoPinsPayload {
 
-        public static final Type<InboxPage> TYPE = new Type<>(id("inbox_page"));
+        public static final ResourceLocation TYPE = ClientboundPayloads.id("inbox_page");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, InboxPage> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<InboxPage> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> {
                             buf.writeByte(payload.tab.id());
                             buf.writeVarInt(payload.page);
                             buf.writeVarInt(payload.totalPages);
                             NetCodecs.writeBoundedList(buf, payload.entries, MAX_SUMMARIES_PER_PACKET,
-                                    (b, pin) -> PinSummary.STREAM_CODEC.encode((RegistryFriendlyByteBuf) b, pin));
+                                    (b, pin) -> PinSummary.STREAM_CODEC.encode(b, pin));
                         },
                         buf -> new InboxPage(
                                 ServerboundPayloads.InboxTab.byId(buf.readByte()),
                                 buf.readVarInt(), buf.readVarInt(),
                                 NetCodecs.readBoundedList(buf, MAX_SUMMARIES_PER_PACKET,
-                                        b -> PinSummary.STREAM_CODEC.decode((RegistryFriendlyByteBuf) b))));
+                                        b -> PinSummary.STREAM_CODEC.decode(b))));
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
@@ -293,14 +292,14 @@ public final class ClientboundPayloads {
      * <p>Only players the server itself already knows are ever listed, and the client is told
      * nothing beyond a name and an online flag.
      */
-    public record KnownPlayers(List<KnownPlayer> players) implements CustomPacketPayload {
+    public record KnownPlayers(List<KnownPlayer> players) implements EchoPinsPayload {
 
         public static final int MAX_PLAYERS = 256;
 
-        public static final Type<KnownPlayers> TYPE = new Type<>(id("known_players"));
+        public static final ResourceLocation TYPE = ClientboundPayloads.id("known_players");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, KnownPlayers> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<KnownPlayers> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> NetCodecs.writeBoundedList(buf, payload.players, MAX_PLAYERS,
                                 (b, player) -> {
                                     NetCodecs.writeUuid(b, player.uuid());
@@ -316,7 +315,7 @@ public final class ClientboundPayloads {
                                         b.readBoolean()))));
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }

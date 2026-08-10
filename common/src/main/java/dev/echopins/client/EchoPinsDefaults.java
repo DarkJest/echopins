@@ -3,10 +3,9 @@ package dev.echopins.client;
 /**
  * Default values and validation bounds for every client option.
  *
- * <p>Single source of truth shared by both loaders. NeoForge stores configuration through its own
- * config system and Fabric through a JSON file; keeping the numbers here means the two can never
- * drift into disagreeing about what "default" means, which is exactly the kind of difference that
- * would only surface as "it behaves differently on Fabric".
+ * <p>Single source of truth shared by all loaders. Forge and NeoForge use their config system and
+ * Fabric uses a JSON file; keeping the numbers here prevents loader builds from disagreeing about
+ * what "default" means, which would otherwise surface as "it behaves differently on Fabric".
  */
 public final class EchoPinsDefaults {
 

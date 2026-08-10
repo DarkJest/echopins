@@ -2,9 +2,7 @@ package dev.echopins.infrastructure.network;
 
 import dev.echopins.infrastructure.network.payload.ClientboundPayloads;
 import dev.echopins.infrastructure.network.payload.ServerboundPayloads;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
@@ -12,14 +10,14 @@ import java.util.List;
 /**
  * The protocol: payload types, their codecs, and where an arriving payload goes.
  *
- * <p>Loader-agnostic on purpose. Payload registration and packet transport differ between NeoForge
- * and Fabric, so each loader supplies a {@link Transport} and walks {@link #serverbound()} and
+ * <p>Loader-agnostic on purpose. Packet transport differs between Forge-family loaders and
+ * Fabric, so each loader supplies a {@link Transport} and walks {@link #serverbound()} and
  * {@link #clientbound()} to register the same types through its own API. Everything else - which
  * payloads exist, how they encode, and what happens when one arrives - lives here once, so the two
- * loaders cannot drift into speaking slightly different protocols.
+ * loader builds cannot drift into speaking slightly different protocols.
  *
- * <p>{@link #PROTOCOL_VERSION} is enforced only where the loader can enforce it. NeoForge
- * negotiates it during login, so a mismatched client is refused with a clear message. Fabric has no
+ * <p>{@link #PROTOCOL_VERSION} is enforced only where the loader can enforce it. Forge and early
+ * NeoForge negotiate it during login, so a mismatched client is refused. Fabric has no
  * equivalent negotiation, so there a mismatch surfaces later as a decode failure. This is why the
  * version is bumped rather than reused: on Fabric it is the payload identifiers themselves that
  * have to change for an incompatible client to be rejected cleanly.
@@ -30,16 +28,17 @@ public final class EchoPinsNetwork {
     public static final String PROTOCOL_VERSION = "1";
 
     /** One registrable payload: its type and the codec that reads and writes it. */
-    public record PayloadSpec<T extends CustomPacketPayload>(
-            CustomPacketPayload.Type<T> type,
-            StreamCodec<RegistryFriendlyByteBuf, T> codec) {
+    public record PayloadSpec<T extends EchoPinsPayload>(
+            ResourceLocation type,
+            Class<T> payloadClass,
+            PacketCodec<T> codec) {
     }
 
     /** How packets actually leave this side. Supplied by the loader. */
     public interface Transport {
-        void toPlayer(ServerPlayer player, CustomPacketPayload payload);
+        void toPlayer(ServerPlayer player, EchoPinsPayload payload);
 
-        void toServer(CustomPacketPayload payload);
+        void toServer(EchoPinsPayload payload);
     }
 
     /**
@@ -83,44 +82,44 @@ public final class EchoPinsNetwork {
     /** Every payload a client may send. */
     public static List<PayloadSpec<?>> serverbound() {
         return List.of(
-                new PayloadSpec<>(ServerboundPayloads.BeginRecording.TYPE,
+                new PayloadSpec<>(ServerboundPayloads.BeginRecording.TYPE, ServerboundPayloads.BeginRecording.class,
                         ServerboundPayloads.BeginRecording.CODEC),
-                new PayloadSpec<>(ServerboundPayloads.FinishRecording.TYPE,
+                new PayloadSpec<>(ServerboundPayloads.FinishRecording.TYPE, ServerboundPayloads.FinishRecording.class,
                         ServerboundPayloads.FinishRecording.CODEC),
-                new PayloadSpec<>(ServerboundPayloads.CancelRecording.TYPE,
+                new PayloadSpec<>(ServerboundPayloads.CancelRecording.TYPE, ServerboundPayloads.CancelRecording.class,
                         ServerboundPayloads.CancelRecording.CODEC),
-                new PayloadSpec<>(ServerboundPayloads.CreatePin.TYPE,
+                new PayloadSpec<>(ServerboundPayloads.CreatePin.TYPE, ServerboundPayloads.CreatePin.class,
                         ServerboundPayloads.CreatePin.CODEC),
-                new PayloadSpec<>(ServerboundPayloads.RequestPlayback.TYPE,
+                new PayloadSpec<>(ServerboundPayloads.RequestPlayback.TYPE, ServerboundPayloads.RequestPlayback.class,
                         ServerboundPayloads.RequestPlayback.CODEC),
-                new PayloadSpec<>(ServerboundPayloads.StopPlayback.TYPE,
+                new PayloadSpec<>(ServerboundPayloads.StopPlayback.TYPE, ServerboundPayloads.StopPlayback.class,
                         ServerboundPayloads.StopPlayback.CODEC),
-                new PayloadSpec<>(ServerboundPayloads.DeletePin.TYPE,
+                new PayloadSpec<>(ServerboundPayloads.DeletePin.TYPE, ServerboundPayloads.DeletePin.class,
                         ServerboundPayloads.DeletePin.CODEC),
-                new PayloadSpec<>(ServerboundPayloads.RequestInbox.TYPE,
+                new PayloadSpec<>(ServerboundPayloads.RequestInbox.TYPE, ServerboundPayloads.RequestInbox.class,
                         ServerboundPayloads.RequestInbox.CODEC),
-                new PayloadSpec<>(ServerboundPayloads.MarkRead.TYPE,
+                new PayloadSpec<>(ServerboundPayloads.MarkRead.TYPE, ServerboundPayloads.MarkRead.class,
                         ServerboundPayloads.MarkRead.CODEC));
     }
 
     /** Every payload the server may send. */
     public static List<PayloadSpec<?>> clientbound() {
         return List.of(
-                new PayloadSpec<>(ClientboundPayloads.ServerSettings.TYPE,
+                new PayloadSpec<>(ClientboundPayloads.ServerSettings.TYPE, ClientboundPayloads.ServerSettings.class,
                         ClientboundPayloads.ServerSettings.CODEC),
-                new PayloadSpec<>(ClientboundPayloads.PinsSnapshot.TYPE,
+                new PayloadSpec<>(ClientboundPayloads.PinsSnapshot.TYPE, ClientboundPayloads.PinsSnapshot.class,
                         ClientboundPayloads.PinsSnapshot.CODEC),
-                new PayloadSpec<>(ClientboundPayloads.PinsDelta.TYPE,
+                new PayloadSpec<>(ClientboundPayloads.PinsDelta.TYPE, ClientboundPayloads.PinsDelta.class,
                         ClientboundPayloads.PinsDelta.CODEC),
-                new PayloadSpec<>(ClientboundPayloads.RecordingState.TYPE,
+                new PayloadSpec<>(ClientboundPayloads.RecordingState.TYPE, ClientboundPayloads.RecordingState.class,
                         ClientboundPayloads.RecordingState.CODEC),
-                new PayloadSpec<>(ClientboundPayloads.PlaybackState.TYPE,
+                new PayloadSpec<>(ClientboundPayloads.PlaybackState.TYPE, ClientboundPayloads.PlaybackState.class,
                         ClientboundPayloads.PlaybackState.CODEC),
-                new PayloadSpec<>(ClientboundPayloads.ErrorMessage.TYPE,
+                new PayloadSpec<>(ClientboundPayloads.ErrorMessage.TYPE, ClientboundPayloads.ErrorMessage.class,
                         ClientboundPayloads.ErrorMessage.CODEC),
-                new PayloadSpec<>(ClientboundPayloads.InboxPage.TYPE,
+                new PayloadSpec<>(ClientboundPayloads.InboxPage.TYPE, ClientboundPayloads.InboxPage.class,
                         ClientboundPayloads.InboxPage.CODEC),
-                new PayloadSpec<>(ClientboundPayloads.KnownPlayers.TYPE,
+                new PayloadSpec<>(ClientboundPayloads.KnownPlayers.TYPE, ClientboundPayloads.KnownPlayers.class,
                         ClientboundPayloads.KnownPlayers.CODEC));
     }
 
@@ -131,54 +130,62 @@ public final class EchoPinsNetwork {
      * single point where "who sent this" is decided, so no handler can be written that trusts a
      * client-supplied identity.
      */
-    public static void handleServerbound(ServerPlayer sender, CustomPacketPayload payload) {
+    public static void handleServerbound(ServerPlayer sender, EchoPinsPayload payload) {
         ServerRequestHandler handler = serverHandler;
         if (handler == null || sender == null) {
             return;
         }
-        switch (payload) {
-            case ServerboundPayloads.BeginRecording p -> handler.onBeginRecording(sender, p);
-            case ServerboundPayloads.FinishRecording ignored -> handler.onFinishRecording(sender);
-            case ServerboundPayloads.CancelRecording ignored -> handler.onCancelRecording(sender);
-            case ServerboundPayloads.CreatePin p -> handler.onCreatePin(sender, p);
-            case ServerboundPayloads.RequestPlayback p -> handler.onRequestPlayback(sender, p);
-            case ServerboundPayloads.StopPlayback p -> handler.onStopPlayback(sender, p);
-            case ServerboundPayloads.DeletePin p -> handler.onDeletePin(sender, p);
-            case ServerboundPayloads.RequestInbox p -> handler.onRequestInbox(sender, p);
-            case ServerboundPayloads.MarkRead p -> handler.onMarkRead(sender, p);
-            default -> {
-                // Unknown payloads can only mean a protocol change, which the version guard
-                // should already have refused, so there is nothing useful to do here.
-            }
+        if (payload instanceof ServerboundPayloads.BeginRecording p) {
+            handler.onBeginRecording(sender, p);
+        } else if (payload instanceof ServerboundPayloads.FinishRecording) {
+            handler.onFinishRecording(sender);
+        } else if (payload instanceof ServerboundPayloads.CancelRecording) {
+            handler.onCancelRecording(sender);
+        } else if (payload instanceof ServerboundPayloads.CreatePin p) {
+            handler.onCreatePin(sender, p);
+        } else if (payload instanceof ServerboundPayloads.RequestPlayback p) {
+            handler.onRequestPlayback(sender, p);
+        } else if (payload instanceof ServerboundPayloads.StopPlayback p) {
+            handler.onStopPlayback(sender, p);
+        } else if (payload instanceof ServerboundPayloads.DeletePin p) {
+            handler.onDeletePin(sender, p);
+        } else if (payload instanceof ServerboundPayloads.RequestInbox p) {
+            handler.onRequestInbox(sender, p);
+        } else if (payload instanceof ServerboundPayloads.MarkRead p) {
+            handler.onMarkRead(sender, p);
         }
     }
 
     /** Routes a payload that arrived from the server. */
-    public static void handleClientbound(CustomPacketPayload payload) {
+    public static void handleClientbound(EchoPinsPayload payload) {
         ClientPayloadReceiver receiver = ClientPayloadReceiver.Holder.get();
-        switch (payload) {
-            case ClientboundPayloads.ServerSettings p -> receiver.onServerSettings(p);
-            case ClientboundPayloads.PinsSnapshot p -> receiver.onSnapshot(p);
-            case ClientboundPayloads.PinsDelta p -> receiver.onDelta(p);
-            case ClientboundPayloads.RecordingState p -> receiver.onRecordingState(p);
-            case ClientboundPayloads.PlaybackState p -> receiver.onPlaybackState(p);
-            case ClientboundPayloads.ErrorMessage p -> receiver.onError(p);
-            case ClientboundPayloads.InboxPage p -> receiver.onInboxPage(p);
-            case ClientboundPayloads.KnownPlayers p -> receiver.onKnownPlayers(p);
-            default -> {
-                // See above.
-            }
+        if (payload instanceof ClientboundPayloads.ServerSettings p) {
+            receiver.onServerSettings(p);
+        } else if (payload instanceof ClientboundPayloads.PinsSnapshot p) {
+            receiver.onSnapshot(p);
+        } else if (payload instanceof ClientboundPayloads.PinsDelta p) {
+            receiver.onDelta(p);
+        } else if (payload instanceof ClientboundPayloads.RecordingState p) {
+            receiver.onRecordingState(p);
+        } else if (payload instanceof ClientboundPayloads.PlaybackState p) {
+            receiver.onPlaybackState(p);
+        } else if (payload instanceof ClientboundPayloads.ErrorMessage p) {
+            receiver.onError(p);
+        } else if (payload instanceof ClientboundPayloads.InboxPage p) {
+            receiver.onInboxPage(p);
+        } else if (payload instanceof ClientboundPayloads.KnownPlayers p) {
+            receiver.onKnownPlayers(p);
         }
     }
 
-    public static void sendTo(ServerPlayer player, CustomPacketPayload payload) {
+    public static void sendTo(ServerPlayer player, EchoPinsPayload payload) {
         Transport current = transport;
         if (current != null) {
             current.toPlayer(player, payload);
         }
     }
 
-    public static void sendToServer(CustomPacketPayload payload) {
+    public static void sendToServer(EchoPinsPayload payload) {
         Transport current = transport;
         if (current != null) {
             current.toServer(payload);

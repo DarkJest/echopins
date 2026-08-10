@@ -45,16 +45,16 @@ Friends see a small marker when they get close and press one key to listen.
 - Inbox screen: Nearby, Mine, Private, Unread
 - Full English and Russian translations
 
-## Requirements
+## Supported versions
 
-|  |  |
-| --- | --- |
-| **Minecraft** | 1.21.1 |
-| **Loader** | NeoForge 21.1.0+ or Fabric Loader 0.19.3+ |
-| **Also required on Fabric** | Fabric API |
-| **Java** | 21 |
-| **Required mod** | Simple Voice Chat 2.6.20+ for 1.21.1 |
-| **Sides** | Client **and** server |
+| Minecraft | Fabric | Forge | NeoForge | Java |
+|---|---:|---:|---:|---:|
+| **1.21.1** | Yes | — | Yes | 21 |
+| **1.20.1** | Yes | Yes | Yes | 17 |
+
+Use the EchoPins and Simple Voice Chat files made for your exact Minecraft version and loader.
+Fabric also requires Fabric API. EchoPins and Simple Voice Chat are required on both client and
+server.
 
 ## Important: how recording works
 

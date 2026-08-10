@@ -8,9 +8,8 @@ import dev.echopins.domain.visibility.Visibility;
 import dev.echopins.infrastructure.network.NetCodecs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import dev.echopins.infrastructure.network.PacketCodec;
+import dev.echopins.infrastructure.network.EchoPinsPayload;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Optional;
@@ -35,7 +34,7 @@ public final class ServerboundPayloads {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(EchoPins.MOD_ID, path);
+        return new ResourceLocation(EchoPins.MOD_ID, path);
     }
 
     /**
@@ -44,12 +43,12 @@ public final class ServerboundPayloads {
      * @param blockTarget the block face the player is looking at, if any. Only a hint: the server
      *                    re-traces reach and uses the player's own dimension regardless.
      */
-    public record BeginRecording(Optional<BlockTarget> blockTarget) implements CustomPacketPayload {
+    public record BeginRecording(Optional<BlockTarget> blockTarget) implements EchoPinsPayload {
 
-        public static final Type<BeginRecording> TYPE = new Type<>(id("begin_recording"));
+        public static final ResourceLocation TYPE = ServerboundPayloads.id("begin_recording");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, BeginRecording> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<BeginRecording> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> {
                             buf.writeBoolean(payload.blockTarget.isPresent());
                             payload.blockTarget.ifPresent(target -> BlockTarget.write(buf, target));
@@ -59,7 +58,7 @@ public final class ServerboundPayloads {
                                 : Optional.empty()));
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
@@ -78,41 +77,41 @@ public final class ServerboundPayloads {
     }
 
     /** Stops capture and asks the server to keep what was recorded, pending confirmation. */
-    public record FinishRecording() implements CustomPacketPayload {
+    public record FinishRecording() implements EchoPinsPayload {
 
-        public static final Type<FinishRecording> TYPE = new Type<>(id("finish_recording"));
+        public static final ResourceLocation TYPE = ServerboundPayloads.id("finish_recording");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, FinishRecording> CODEC =
-                StreamCodec.unit(new FinishRecording());
+        public static final PacketCodec<FinishRecording> CODEC =
+                PacketCodec.unit(new FinishRecording());
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
 
     /** Abandons the recording and any audio already written for it. */
-    public record CancelRecording() implements CustomPacketPayload {
+    public record CancelRecording() implements EchoPinsPayload {
 
-        public static final Type<CancelRecording> TYPE = new Type<>(id("cancel_recording"));
+        public static final ResourceLocation TYPE = ServerboundPayloads.id("cancel_recording");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, CancelRecording> CODEC =
-                StreamCodec.unit(new CancelRecording());
+        public static final PacketCodec<CancelRecording> CODEC =
+                PacketCodec.unit(new CancelRecording());
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
 
     /** Confirms a pending recording and supplies the pin's settings. */
     public record CreatePin(Visibility visibility, Set<UUID> recipients,
-                            Optional<String> caption, ExpiryChoice expiry) implements CustomPacketPayload {
+                            Optional<String> caption, ExpiryChoice expiry) implements EchoPinsPayload {
 
-        public static final Type<CreatePin> TYPE = new Type<>(id("create_pin"));
+        public static final ResourceLocation TYPE = ServerboundPayloads.id("create_pin");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, CreatePin> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<CreatePin> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> {
                             buf.writeByte(payload.visibility.id());
                             NetCodecs.writeUuidSet(buf, payload.recipients, MAX_RECIPIENTS_WIRE_LIMIT);
@@ -130,55 +129,55 @@ public final class ServerboundPayloads {
                                 ExpiryChoice.byId(buf.readByte())));
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
 
     /** Asks to hear a pin. The server re-checks access and distance before playing anything. */
-    public record RequestPlayback(PinId pin) implements CustomPacketPayload {
+    public record RequestPlayback(PinId pin) implements EchoPinsPayload {
 
-        public static final Type<RequestPlayback> TYPE = new Type<>(id("request_playback"));
+        public static final ResourceLocation TYPE = ServerboundPayloads.id("request_playback");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, RequestPlayback> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<RequestPlayback> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> NetCodecs.writePinId(buf, payload.pin),
                         buf -> new RequestPlayback(NetCodecs.readPinId(buf)));
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
 
     /** Stops a playback this player started. */
-    public record StopPlayback(PinId pin) implements CustomPacketPayload {
+    public record StopPlayback(PinId pin) implements EchoPinsPayload {
 
-        public static final Type<StopPlayback> TYPE = new Type<>(id("stop_playback"));
+        public static final ResourceLocation TYPE = ServerboundPayloads.id("stop_playback");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, StopPlayback> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<StopPlayback> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> NetCodecs.writePinId(buf, payload.pin),
                         buf -> new StopPlayback(NetCodecs.readPinId(buf)));
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
 
     /** Asks to delete a pin. Authorised server-side; ownership is never taken from the client. */
-    public record DeletePin(PinId pin) implements CustomPacketPayload {
+    public record DeletePin(PinId pin) implements EchoPinsPayload {
 
-        public static final Type<DeletePin> TYPE = new Type<>(id("delete_pin"));
+        public static final ResourceLocation TYPE = ServerboundPayloads.id("delete_pin");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, DeletePin> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<DeletePin> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> NetCodecs.writePinId(buf, payload.pin),
                         buf -> new DeletePin(NetCodecs.readPinId(buf)));
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
@@ -211,12 +210,12 @@ public final class ServerboundPayloads {
     }
 
     /** Requests one page of the inbox. */
-    public record RequestInbox(InboxTab tab, int page) implements CustomPacketPayload {
+    public record RequestInbox(InboxTab tab, int page) implements EchoPinsPayload {
 
-        public static final Type<RequestInbox> TYPE = new Type<>(id("request_inbox"));
+        public static final ResourceLocation TYPE = ServerboundPayloads.id("request_inbox");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, RequestInbox> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<RequestInbox> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> {
                             buf.writeByte(payload.tab.id());
                             buf.writeVarInt(payload.page);
@@ -231,23 +230,23 @@ public final class ServerboundPayloads {
                         });
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }
 
     /** Marks a pin as listened to. */
-    public record MarkRead(PinId pin) implements CustomPacketPayload {
+    public record MarkRead(PinId pin) implements EchoPinsPayload {
 
-        public static final Type<MarkRead> TYPE = new Type<>(id("mark_read"));
+        public static final ResourceLocation TYPE = ServerboundPayloads.id("mark_read");
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, MarkRead> CODEC =
-                StreamCodec.of(
+        public static final PacketCodec<MarkRead> CODEC =
+                PacketCodec.of(
                         (buf, payload) -> NetCodecs.writePinId(buf, payload.pin),
                         buf -> new MarkRead(NetCodecs.readPinId(buf)));
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public ResourceLocation id() {
             return TYPE;
         }
     }

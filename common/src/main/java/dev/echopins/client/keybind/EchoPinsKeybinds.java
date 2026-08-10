@@ -8,7 +8,7 @@ import org.lwjgl.glfw.GLFW;
  * The mod's key bindings.
  *
  * <p>Declared with the vanilla {@code KeyMapping} constructor rather than a loader-specific one,
- * so the same objects serve both NeoForge and Fabric; each loader only has to register them.
+ * so the same objects serve Fabric, Forge and NeoForge; each loader only has to register them.
  * Players remap them through the vanilla controls screen either way. The defaults were picked to avoid vanilla and to avoid the keys
  * Simple Voice Chat claims by default ({@code V} and {@code CAPS_LOCK}).
  */

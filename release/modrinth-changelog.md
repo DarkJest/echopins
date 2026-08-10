@@ -1,21 +1,23 @@
-# EchoPins 1.1.1
+# EchoPins 1.2.0-beta.1
 
-Reliability hotfix for Minecraft 1.21.1 on **Fabric and NeoForge**.
+Beta support for Minecraft **1.20.1** on Fabric, Forge and NeoForge. Minecraft 1.21.1 remains
+available as the stable v1.1.1 release for Fabric and NeoForge.
+
+### Added
+
+- Minecraft 1.20.1 builds for Fabric, Forge and NeoForge.
+- Dedicated Forge artifact.
+- Loader metadata regression tests.
 
 ### Fixed
 
-- Atomic total-audio quota enforcement, including concurrent recording saves.
-- Stale recording/playback completion after disconnect, reconnect, death or dimension change.
-- Playback access, range and voice-connection state changing while audio is loaded asynchronously.
-- Client block targets being trusted without a matching server-side ray trace.
-- Newer world-data schemas being overwritten by an older mod build.
-- Known-player packet overflow on servers with more than 256 players.
-- CI/release paths after the project moved to separate Fabric and NeoForge modules.
+- Fabric now registers the correct Simple Voice Chat plugin entrypoint, so recording and playback
+  events are available.
 
-### Changed
+### Verification
 
-- Added new dual-loader banners and refreshed, clearly labelled UI mockups.
-- Corrected Fabric installation instructions and loader badges.
+- 318 automated tests passed.
+- All three dedicated-server smoke tests loaded EchoPins with Simple Voice Chat.
 
-Choose the jar matching your loader. Both sides require EchoPins, Simple Voice Chat and Java 21;
-Fabric also requires Fabric API.
+Install the file matching your loader. Both client and server require EchoPins and Simple Voice
+Chat. Fabric also requires Fabric API. Java 17 is required.

@@ -5,13 +5,11 @@ import dev.echopins.domain.pin.PinId;
 import dev.echopins.domain.repository.InMemoryPinRepository;
 import dev.echopins.domain.repository.InMemoryReadStateRepository;
 import dev.echopins.infrastructure.persistence.migration.DataMigrationRegistry;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,16 +58,20 @@ public final class EchoPinsSavedData extends SavedData {
     private EchoPinsSavedData() {
     }
 
-    public static SavedData.Factory<EchoPinsSavedData> factory() {
-        // The three-argument form is the vanilla one. NeoForge adds a two-argument overload with a
-        // nullable data-fixer type, but Fabric does not, so the shared code uses what both have.
-        return new SavedData.Factory<>(EchoPinsSavedData::new, EchoPinsSavedData::load,
-                DataFixTypes.LEVEL);
+    /** Creates an unattached store for migration and round-trip verification. */
+    public static EchoPinsSavedData empty() {
+        return new EchoPinsSavedData();
+    }
+
+    /** Decodes a store without attaching it to a level. */
+    public static EchoPinsSavedData fromTag(CompoundTag tag) {
+        return load(tag);
     }
 
     /** Fetches (or creates) the global store, which always lives on the Overworld. */
     public static EchoPinsSavedData get(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(factory(), DATA_NAME);
+        return server.overworld().getDataStorage().computeIfAbsent(
+                EchoPinsSavedData::load, EchoPinsSavedData::new, DATA_NAME);
     }
 
     public InMemoryPinRepository pins() {
@@ -80,7 +82,7 @@ public final class EchoPinsSavedData extends SavedData {
         return readState;
     }
 
-    private static EchoPinsSavedData load(CompoundTag tag, HolderLookup.Provider registries) {
+    private static EchoPinsSavedData load(CompoundTag tag) {
         EchoPinsSavedData data = new EchoPinsSavedData();
         int fileVersion = tag.contains(KEY_DATA_VERSION, Tag.TAG_INT)
                 ? tag.getInt(KEY_DATA_VERSION)
@@ -169,7 +171,7 @@ public final class EchoPinsSavedData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    public CompoundTag save(CompoundTag tag) {
         if (newerSchemaSnapshot != null) {
             LOGGER.error("Refusing to overwrite EchoPins data from a newer schema; session changes "
                     + "will not be persisted until the mod is updated");

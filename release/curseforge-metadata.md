@@ -32,9 +32,9 @@ Do not tag **Adventure and RPG**, **World Gen**, **Technology**, or **Magic**. N
 
 | Field | Value |
 |---|---|
-| Minecraft | `1.21.1` |
-| Modloader | `NeoForge` **and** `Fabric` |
-| Java | `Java 21` |
+| Minecraft | `1.20.1` |
+| Modloader | `Fabric`, `Forge` **and** `NeoForge` |
+| Java | `Java 17` |
 | Environment | Client **and** Server |
 
 Each uploaded file carries only its own loader tag. Do not tag the NeoForge jar as Fabric or the
@@ -57,16 +57,16 @@ No optional, embedded, incompatible or tool relations.
 
 ## File upload
 
-Two files per release, uploaded separately.
+Three files for this beta, uploaded separately.
 
-| Field | NeoForge | Fabric |
-|---|---|---|
-| File | `echopins-neoforge-1.1.0+mc1.21.1.jar` | `echopins-fabric-1.1.0+mc1.21.1.jar` |
-| Display name | `EchoPins 1.1.0 (MC 1.21.1, NeoForge)` | `EchoPins 1.1.0 (MC 1.21.1, Fabric)` |
-| Modloader tag | `NeoForge` | `Fabric` |
-| Dependencies | Simple Voice Chat | Simple Voice Chat, Fabric API |
-| Release type | see below | see below |
-| Changelog | contents of `curseforge-changelog.md`, markdown | same |
+| Field | Fabric | Forge | NeoForge |
+|---|---|---|---|
+| File | `echopins-fabric-1.2.0-beta.1+mc1.20.1.jar` | `echopins-forge-1.2.0-beta.1+mc1.20.1.jar` | `echopins-neoforge-1.2.0-beta.1+mc1.20.1.jar` |
+| Display name | `EchoPins 1.2.0-beta.1 (MC 1.20.1, Fabric)` | `EchoPins 1.2.0-beta.1 (MC 1.20.1, Forge)` | `EchoPins 1.2.0-beta.1 (MC 1.20.1, NeoForge)` |
+| Modloader tag | `Fabric` | `Forge` | `NeoForge` |
+| Dependencies | Simple Voice Chat, Fabric API | Simple Voice Chat | Simple Voice Chat |
+| Release type | Beta | Beta | Beta |
+| Changelog | contents of `curseforge-changelog.md`, markdown | same | same |
 
 ### Release type
 

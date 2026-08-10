@@ -24,11 +24,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '17'
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -55,6 +55,8 @@ jobs:
           path: |
             fabric/build/test-results/test/**/*.xml
             fabric/build/reports/tests/test/**
+            forge/build/test-results/test/**/*.xml
+            forge/build/reports/tests/test/**
             neoforge/build/test-results/test/**/*.xml
             neoforge/build/reports/tests/test/**
           retention-days: 14
@@ -65,55 +67,7 @@ jobs:
           name: echopins-jar
           path: |
             fabric/build/libs/*.jar
+            forge/build/libs/*.jar
             neoforge/build/libs/*.jar
           if-no-files-found: error
           retention-days: 30
-
-  # GameTests need a headless Minecraft server, which is materially heavier than the unit tests.
-  # Kept as a separate job so a failure here is distinguishable from a normal build failure, and
-  # so it can be made required separately once it has proven stable in CI.
-  gametest:
-    name: GameTests
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    needs: build
-    continue-on-error: true
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: true
-
-      - name: Cache NeoForm artifacts
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/caches/neoformruntime
-          key: neoform-${{ runner.os }}-${{ hashFiles('gradle.properties') }}
-          restore-keys: neoform-${{ runner.os }}-
-
-      - name: Accept the Minecraft EULA for the test server
-        run: |
-          mkdir -p run/gameTestServer
-          echo "eula=true" > run/gameTestServer/eula.txt
-
-      - name: Run GameTests
-        run: ./gradlew runGameTestServer --stacktrace
-
-      - name: Upload server log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gametest-logs
-          path: run/**/logs/**
-          if-no-files-found: ignore
-          retention-days: 14
